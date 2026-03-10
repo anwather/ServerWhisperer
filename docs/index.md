@@ -20,6 +20,25 @@ No complex commands. No scripts to learn. Just ask what's wrong.
 
 ---
 
+## ⚡ Install Now (30 Seconds)
+
+The **fastest way to get started** is to install ServerWhisperer as a Copilot CLI plugin:
+
+```bash
+copilot
+/plugin install anwather/ServerWhisperer
+```
+
+Then ask a question:
+
+```
+? "What is going on with server01?"
+```
+
+That's it! All diagnostic skills are built-in. [Full instructions →](/ServerWhisperer/getting-started)
+
+---
+
 {: .highlight }
 > ⚡ **First time using Copilot CLI?** No problem. We'll walk you through installing everything, step by step.
 

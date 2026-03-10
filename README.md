@@ -6,7 +6,7 @@ No complex commands. No scripts to learn. Just ask what's wrong, and get answers
 
 ---
 
-## 🚀 Quick Start — 5 Minutes
+## 🚀 Quick Start — 2 Minutes
 
 ### What You'll Need
 
@@ -14,7 +14,36 @@ No complex commands. No scripts to learn. Just ask what's wrong, and get answers
 - ✅ Admin access to at least one Windows Server you want to investigate
 - ✅ Internet connection (to authenticate with GitHub)
 
-### Step 0: Install GitHub CLI
+### Install as Plugin (Recommended) ⭐
+
+The fastest way to get started: install ServerWhisperer as a Copilot CLI plugin.
+
+```bash
+copilot
+```
+
+Once in Copilot CLI, run:
+
+```bash
+/plugin install anwather/ServerWhisperer
+```
+
+That's it! You now have ServerWhisperer installed with all diagnostic skills ready to use. Just ask:
+
+```
+? What would you like help with?
+> What is going on with server01?
+```
+
+**Note on Credentials:** If you're connecting to Azure VMs or non-domain servers, you'll need to set up credentials separately (see [Credential Setup](#setting-up-credentials) below).
+
+---
+
+### Alternative: Clone & Setup
+
+If you prefer to work with the full repository (for development or advanced use), you can clone instead:
+
+#### Step 1: Install GitHub CLI
 
 **Windows:** Open PowerShell and run:
 ```powershell
@@ -28,74 +57,45 @@ Verify it installed:
 gh --version
 ```
 
-Expected: `gh version X.X.X (YYYY-MM-DD)`
-
-### Step 1: Authenticate with GitHub
+#### Step 2: Authenticate with GitHub
 
 ```bash
 gh auth login
 ```
 
-Follow the prompts:
-- **What account do you want to log into?** → GitHub.com
-- **What is your preferred protocol for Git operations?** → HTTPS
-- **Authenticate Git with your GitHub credentials?** → Y
-- **How would you like to authenticate GitHub CLI?** → Login with a web browser
+Follow the prompts and authorize via your browser.
 
-A browser will open. Click **Authorize GitHub CLI** and you're done.
-
-### Step 2: Install Copilot CLI Extension
+#### Step 3: Install Copilot CLI Extension
 
 ```bash
 gh extension install github/gh-copilot
 ```
 
-Verify it's installed:
-```bash
-gh copilot --version
-```
-
-### Step 3: Clone ServerWhisperer
+#### Step 4: Clone ServerWhisperer
 
 ```bash
 gh repo clone anwather/ServerWhisperer
 cd ServerWhisperer
 ```
 
-### Step 4: Run the Setup Script
-
-**IMPORTANT: Run this FIRST after cloning.** This removes development files you don't need.
+#### Step 5: Run the Setup Script
 
 ```powershell
 .\Setup.ps1
 ```
 
-The script will:
-- Remove development artifacts (`.squad/`, `docs/`, etc.)
-- Keep everything needed for investigations
-- Show you what was removed and what's left
-- Tell you the next steps
-
-**That's it!** All diagnostic skills are built-in and automatically loaded when you run `gh copilot` in this directory. No manual skill installation or configuration needed.
-
-### Step 5: Start Your First Investigation
+#### Step 6: Start Your First Investigation
 
 ```bash
 gh copilot
 ```
 
-This opens an interactive session. You'll see a prompt — just ask:
+Ask a question:
 
 ```
 ? What would you like help with?
-
-Ask anything about your Windows Servers, like:
-  - "What is going on with server01?"
-  - "Is the SQL service running on server02?"
-  - "server03 is slow — what's using the CPU?"
+> What is going on with server01?
 ```
-
-Type your question and press Enter. The agent loads automatically with all diagnostic skills embedded—no installation or setup needed.
 
 ---
 

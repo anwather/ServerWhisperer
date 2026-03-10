@@ -30,7 +30,81 @@ Before you start, make sure you have:
 
 ---
 
-## Step 0: Verify PowerShell
+## Install as Plugin (Recommended) ⭐
+
+**The quickest way to get started.** Install ServerWhisperer directly as a Copilot CLI plugin in 30 seconds.
+
+### Prerequisites
+
+You need GitHub CLI installed and authenticated. If you already have these, skip to Step 1. Otherwise:
+
+1. **Install GitHub CLI** (if you don't have it):
+   ```powershell
+   winget install GitHub.cli
+   ```
+
+2. **Authenticate with GitHub**:
+   ```bash
+   gh auth login
+   ```
+   Follow the prompts and authorize via your browser.
+
+3. **Verify everything is set up**:
+   ```bash
+   gh auth status
+   ```
+   You should see: `Logged in to github.com as YOUR-USERNAME`
+
+### Step 1: Launch Copilot CLI
+
+Open PowerShell (or any terminal) and type:
+
+```bash
+copilot
+```
+
+You'll see the Copilot CLI prompt.
+
+### Step 2: Install ServerWhisperer as a Plugin
+
+```bash
+/plugin install anwather/ServerWhisperer
+```
+
+Expected output:
+```
+✓ Plugin installed successfully
+```
+
+That's it! The plugin is now installed with all diagnostic skills ready to use.
+
+### Step 3: Start Your First Investigation
+
+Ask ServerWhisperer about any of your Windows Servers:
+
+```
+? What would you like help with?
+> What is going on with server01?
+```
+
+ServerWhisperer will:
+1. Connect to server01 using your current Windows credentials
+2. Run quick diagnostics (disk space, memory, services, etc.)
+3. Return a structured report with findings and next steps
+
+### Note on Credentials
+
+If you're connecting to **domain-joined servers** with your current Windows account, credentials are handled automatically — no setup needed.
+
+If you're connecting to **Azure VMs** or **non-domain servers**, you need to set up credentials separately. See [Setting Up Credentials](#setting-up-credentials) below.
+
+---
+
+## Alternative: Clone & Setup from Repository
+
+If you want to work with the full codebase (for development, customization, or if the plugin method isn't available in your environment), follow these steps instead.
+
+### Step 0: Verify PowerShell
 
 Open PowerShell on your local machine and check the version:
 
