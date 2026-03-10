@@ -122,11 +122,11 @@ gh copilot --version
 
 ---
 
-## Step 4: Clone win-investigator
+## Step 4: Clone ServerWhisperer
 
 ```bash
-gh repo clone anwather/win-investigator
-cd win-investigator
+gh repo clone anwather/ServerWhisperer
+cd ServerWhisperer
 ```
 
 This creates a folder and copies all the agent instructions and diagnostic skills.
@@ -197,12 +197,12 @@ If this fails, see the [Troubleshooting](#troubleshooting) section below.
 
 ## Setting Up Credentials
 
-Win-Investigator needs credentials to connect to your servers. There are two approaches:
+ServerWhisperer needs credentials to connect to your servers. There are two approaches:
 
 ### Default: Current User (No Setup Needed)
 
 If your Windows machine is domain-joined and you have admin rights on the target servers, 
-**no credential setup is needed**. Win-Investigator uses your current user identity automatically.
+**no credential setup is needed**. ServerWhisperer uses your current user identity automatically.
 
 ```
 User: "What is going on with server01?"
@@ -212,23 +212,23 @@ User: "What is going on with server01?"
 ### Explicit: File-Based Encrypted Credentials
 
 When connecting to servers where you need different credentials (like Azure VMs, cross-domain servers, or workgroup servers), 
-you must **save credentials to an encrypted file ONE TIME** before using win-investigator.
+you must **save credentials to an encrypted file ONE TIME** before using ServerWhisperer.
 
 **How to set up credentials (one-time):**
 
 1. Open your PowerShell terminal
 2. Create the credentials directory:
    ```powershell
-   New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
+   New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
    ```
 3. Save your credentials to an encrypted file:
    ```powershell
-   Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+   Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
    ```
 4. A **secure Windows login dialog** will appear
 5. Enter your username and password in the dialog (NOT in the chat)
 6. The password is entered securely and encrypted using DPAPI (tied to your user + machine)
-7. The encrypted file is saved to `$HOME\.wininvestigator\credentials.xml`
+7. The encrypted file is saved to `$HOME\.serverwhisperer\credentials.xml`
 8. Start `gh copilot` — the agent will load the credentials automatically when needed
 
 **What the dialog looks like:**
@@ -249,8 +249,8 @@ The agent will tell you:
 ⚠️ No saved credentials found.
 
 To save credentials for server connections, run:
-  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
-  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
+  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
 
 Then ask me again and I'll load the saved credentials.
 ```
@@ -258,8 +258,8 @@ Then ask me again and I'll load the saved credentials.
 **Multiple servers with different credentials:**
 You can create server-specific credential files:
 ```powershell
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\server01-cred.xml"
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\azure-vm-cred.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\server01-cred.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\azure-vm-cred.xml"
 ```
 The agent will check for server-specific credentials first, then fall back to the default `credentials.xml`.
 
@@ -297,10 +297,10 @@ gh extension list | grep copilot
 
 Should show: `github/gh-copilot` in the list
 
-### ✅ Check 4: Is win-investigator cloned?
+### ✅ Check 4: Is ServerWhisperer cloned?
 
 ```bash
-cd win-investigator
+cd ServerWhisperer
 ls
 ```
 
@@ -320,10 +320,10 @@ Should show protocol and product info (see Step 5 above for example output).
 
 ## Your First Investigation
 
-Now you're ready! Open PowerShell in the win-investigator folder and start an interactive session:
+Now you're ready! Open PowerShell in the ServerWhisperer folder and start an interactive session:
 
 ```bash
-cd win-investigator
+cd ServerWhisperer
 gh copilot
 ```
 
@@ -334,7 +334,7 @@ You'll see a prompt asking what you need help with. Just ask a question about yo
 > What is going on with server01?
 ```
 
-Win-Investigator will:
+ServerWhisperer will:
 
 1. Connect to server01 using your current Windows credentials
 2. Run quick diagnostics (disk space, memory, services, etc.)
@@ -344,7 +344,7 @@ Win-Investigator will:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -513,7 +513,7 @@ Follow the prompts to authenticate with GitHub via web browser.
 
 ### `Error: Access denied`
 
-**Problem:** Win-Investigator can reach the server but can't run commands.
+**Problem:** ServerWhisperer can reach the server but can't run commands.
 
 **Solution:**
 
@@ -531,7 +531,7 @@ Follow the prompts to authenticate with GitHub via web browser.
 
 2. **Or use explicit credentials:**
 
-   When Win-Investigator asks a question, mention credentials:
+   When ServerWhisperer asks a question, mention credentials:
 
    ```
    ? "Check server01 with domain\admin credentials"
@@ -576,10 +576,10 @@ Follow the prompts to authenticate with GitHub via web browser.
 
 Once you've verified your setup and run your first investigation:
 
-- [Learn how to ask better questions →](/win-investigator/usage)
-- [See what diagnostics are available →](/win-investigator/diagnostics)
-- [Check out example sessions →](/win-investigator/examples)
+- [Learn how to ask better questions →](/ServerWhisperer/usage)
+- [See what diagnostics are available →](/ServerWhisperer/diagnostics)
+- [Check out example sessions →](/ServerWhisperer/examples)
 
 ---
 
-_Built by the Win-Investigator team._
+_Built by the ServerWhisperer team._

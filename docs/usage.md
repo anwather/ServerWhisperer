@@ -2,13 +2,13 @@
 layout: default
 title: Usage Guide
 nav_order: 2
-description: "How to talk to Win-Investigator. Simple examples, credential handling, understanding reports."
+description: "How to talk to ServerWhisperer. Simple examples, credential handling, understanding reports."
 ---
 
 # Usage Guide
 {: .no_toc }
 
-**How to ask Win-Investigator questions and read the reports.**
+**How to ask ServerWhisperer questions and read the reports.**
 {: .fs-6 .fw-300 }
 
 ## Table of contents
@@ -21,7 +21,7 @@ description: "How to talk to Win-Investigator. Simple examples, credential handl
 
 ## How to Talk to the Agent
 
-Win-Investigator is like chatting with a colleague. Just describe what you want to know.
+ServerWhisperer is like chatting with a colleague. Just describe what you want to know.
 
 {: .note }
 > **Include the server name** and **what you're concerned about**. The more specific, the better.
@@ -29,7 +29,7 @@ Win-Investigator is like chatting with a colleague. Just describe what you want 
 ### Start an Interactive Session
 
 ```bash
-cd win-investigator
+cd ServerWhisperer
 gh copilot
 ```
 
@@ -106,7 +106,7 @@ You'll get: Network adapter status, IP config, ping tests, open ports.
 
 ### Default (Uses Your Current User)
 
-By default, Win-Investigator uses your Windows user account. If you have admin access to the target server, just ask:
+By default, ServerWhisperer uses your Windows user account. If you have admin access to the target server, just ask:
 
 ```
 ? "Check server01"
@@ -158,7 +158,7 @@ All reports follow the same structure, so they're easy to read.
 
 ### Parallel Background Investigations
 
-When you ask for a full investigation, Win-Investigator runs all diagnostics **simultaneously as background jobs** instead of one-by-one. This drastically cuts investigation time from 2-3 minutes down to 30-60 seconds.
+When you ask for a full investigation, ServerWhisperer runs all diagnostics **simultaneously as background jobs** instead of one-by-one. This drastically cuts investigation time from 2-3 minutes down to 30-60 seconds.
 
 {: .note }
 > **What happens:** You ask your question → Agent starts 8-10 diagnostics as parallel jobs → Results stream in as they complete → You see findings prioritized by severity, not by completion order.
@@ -171,7 +171,7 @@ Some diagnostics are fast (overview, disk, network take 2-10s), while others are
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01                          ← Target server
@@ -275,7 +275,7 @@ gh copilot
 
 ## Automated Investigations (Advanced)
 
-By default, Win-Investigator is interactive — you ask questions and get reports instantly. But you can also configure it to **run automatically from Azure Monitor alerts**.
+By default, ServerWhisperer is interactive — you ask questions and get reports instantly. But you can also configure it to **run automatically from Azure Monitor alerts**.
 
 {: .note }
 > See [Automated Investigations]({{ site.baseurl }}/automation.md) for the complete guide to setting up alert-triggered diagnostics, credential handling via Azure Key Vault, and GitHub Actions integration.
@@ -299,9 +299,9 @@ By default, Win-Investigator is interactive — you ask questions and get report
 ## Limitations & When to Escalate
 
 {: .note }
-> Win-Investigator is a **diagnostic tool**, not an automation tool. It reports findings and suggests actions — it does not make changes to your servers.
+> ServerWhisperer is a **diagnostic tool**, not an automation tool. It reports findings and suggests actions — it does not make changes to your servers.
 
-### What Win-Investigator Can Do
+### What ServerWhisperer Can Do
 
 - ✅ Report what's happening on your servers
 - ✅ Identify problems and suggest causes
@@ -337,4 +337,4 @@ By default, Win-Investigator is interactive — you ask questions and get report
 
 ---
 
-_Built by the Win-Investigator team._
+_Built by the ServerWhisperer team._

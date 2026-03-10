@@ -2,13 +2,13 @@
 layout: default
 title: Diagnostics Reference
 nav_order: 3
-description: "Complete reference of all Win-Investigator diagnostic skills and what they check"
+description: "Complete reference of all ServerWhisperer diagnostic skills and what they check"
 ---
 
 # Diagnostics Reference
 {: .no_toc }
 
-Win-Investigator includes 10 focused diagnostic skills. Each one is triggered by the type of question you ask.
+ServerWhisperer includes 10 focused diagnostic skills. Each one is triggered by the type of question you ask.
 {: .fs-6 .fw-300 }
 
 ## Table of contents
@@ -352,4 +352,4 @@ Win-Investigator includes 10 focused diagnostic skills. Each one is triggered by
 
 ---
 
-_Built by the Win-Investigator team._
+_Built by the ServerWhisperer team._

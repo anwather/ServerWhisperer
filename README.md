@@ -1,4 +1,4 @@
-# Win-Investigator
+# 🔮 ServerWhisperer
 
 **Ask questions about your Windows Servers in plain English. Get clear reports instantly.**
 
@@ -55,11 +55,11 @@ Verify it's installed:
 gh copilot --version
 ```
 
-### Step 3: Clone win-investigator
+### Step 3: Clone ServerWhisperer
 
 ```bash
-gh repo clone anwather/win-investigator
-cd win-investigator
+gh repo clone anwather/ServerWhisperer
+cd ServerWhisperer
 ```
 
 ### Step 4: Run the Setup Script
@@ -104,7 +104,7 @@ Type your question and press Enter. The agent loads automatically with all diagn
 ```
 You ask a question (plain English)
     ↓
-Win-Investigator connects to your server (via PowerShell)
+ServerWhisperer connects to your server (via PowerShell)
     ↓
 Runs multiple diagnostics **simultaneously** (not sequentially)
     ↓
@@ -180,7 +180,7 @@ Test-WSMan server01 -UseSSL -Port 5986 -SkipCACheck -SkipCNCheck
 ### Admin Rights on Target Servers
 
 - Your user must have **local administrator** rights on the target, OR
-- You can provide **different credentials** when asking (save them to `$HOME\.wininvestigator\credentials.xml` using Export-Clixml)
+- You can provide **different credentials** when asking (save them to `$HOME\.serverwhisperer\credentials.xml` using Export-Clixml)
 
 ### GitHub Account
 
@@ -192,7 +192,7 @@ You need a free GitHub account to authenticate. Sign up at https://github.com if
 
 ### Default (Automatic)
 
-Win-Investigator uses **your current Windows user** by default. No passwords to enter.
+ServerWhisperer uses **your current Windows user** by default. No passwords to enter.
 
 ```bash
 gh copilot
@@ -204,14 +204,14 @@ gh copilot
 ### Explicit Credentials (File-Based Encrypted Storage)
 
 If you need different credentials (e.g., a dedicated admin account, Azure VM access, cross-domain), 
-save them to an encrypted file **one time** before using win-investigator:
+save them to an encrypted file **one time** before using ServerWhisperer:
 
 ```powershell
 # Step 1: Create the credentials directory
-New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
+New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
 
 # Step 2: Save your credentials (opens secure Windows dialog)
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
 # Enter username and password in the GUI dialog
 
 # Step 3: Start Copilot (credentials are automatically loaded when needed)
@@ -223,7 +223,7 @@ gh copilot
 1. You create the credential file one time using Export-Clixml
 2. Windows opens a secure login dialog — enter username/password there
 3. PowerShell encrypts the credentials using DPAPI (tied to your user + machine)
-4. The file is saved to `$HOME\.wininvestigator\credentials.xml`
+4. The file is saved to `$HOME\.serverwhisperer\credentials.xml`
 5. When you run `gh copilot`, the agent loads the saved credentials automatically when needed
 6. Only you on this machine can decrypt the file — it's not portable by design
 
@@ -234,7 +234,7 @@ of Copilot using Export-Clixml. The file contains encrypted data (DPAPI), not pl
 
 ## Available Diagnostics
 
-Win-Investigator can run these focused checks based on your question. **Full investigations run all diagnostics in parallel** — reducing total time from 2-3 minutes to 30-60 seconds.
+ServerWhisperer can run these focused checks based on your question. **Full investigations run all diagnostics in parallel** — reducing total time from 2-3 minutes to 30-60 seconds.
 
 | Concern | Command Example | What You Get | Speed |
 |---------|-----------------|-------------|-------|
@@ -250,7 +250,7 @@ Win-Investigator can run these focused checks based on your question. **Full inv
 
 ## Automated Investigations (Advanced Feature)
 
-Want Win-Investigator to run automatically when Azure alerts fire? Configure it to trigger from Azure Monitor alerts via GitHub Actions:
+Want ServerWhisperer to run automatically when Azure alerts fire? Configure it to trigger from Azure Monitor alerts via GitHub Actions:
 
 - 🚨 **Alert-triggered diagnostics** — Azure alert fires → GitHub creates issue with diagnostic results
 - 🔐 **Secure credential handling** — Server credentials stored in Azure Key Vault, never in GitHub
@@ -296,7 +296,7 @@ If this fails:
 
 ### 4. Copilot CLI Installed
 
-Win-Investigator runs within the Copilot CLI. You need:
+ServerWhisperer runs within the Copilot CLI. You need:
 
 ```bash
 # Install Copilot CLI (if not already installed)
@@ -370,7 +370,7 @@ If diagnostics hang or timeout:
 ```
 User Question (Copilot CLI)
          ↓
-Win-Investigator Agent
+ServerWhisperer Agent
   • Parse question → Identify server & concern
   • Route to appropriate diagnostic skill
   • Connect via PowerShell remoting
@@ -410,7 +410,7 @@ All diagnostic reports follow a consistent structure:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: [hostname or IP]
@@ -449,7 +449,7 @@ SUMMARY
 
 ## Limitations
 
-**Win-Investigator is a diagnostic tool, not an automation tool.**
+**ServerWhisperer is a diagnostic tool, not an automation tool.**
 
 It can:
 - ✅ Report what's happening on your servers
@@ -485,7 +485,7 @@ Connecting to server01 via PowerShell remoting...
 Running overview + key health checks...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -531,7 +531,7 @@ Parsing... server01, disk space concern, using current user credentials
 Running disk-storage diagnostic skill...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT — DISK ANALYSIS
+🔍 SERVERWHISPERER REPORT — DISK ANALYSIS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -616,7 +616,7 @@ For questions or issues:
 **For developers and squad members:**
 
 - Agent instructions: `.github/copilot-instructions.md`
-- Agent definition: `.github/agents/win-investigator.md`
+- Agent definition: `.github/agents/ServerWhisperer.md`
 - Diagnostic skills: `.squad/skills/` (PowerShell implementations)
 - Team charter and roles: `.squad/agents/{name}/charter.md`
 - Project decisions: `.squad/decisions.md`
@@ -625,6 +625,6 @@ See `.squad/team.md` for the team roster and member expertise.
 
 ---
 
-**Built with ❤️ by the win-investigator squad.**
+**Built with ❤️ by the ServerWhisperer squad.**
 
 *Last updated: 2026-03-09*

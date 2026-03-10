@@ -2,13 +2,13 @@
 layout: default
 title: Automated Investigations
 nav_order: 7
-description: "How to configure Win-Investigator to run automatically from Azure Monitor alerts via GitHub Actions"
+description: "How to configure ServerWhisperer to run automatically from Azure Monitor alerts via GitHub Actions"
 ---
 
 # Automated Investigations
 {: .no_toc }
 
-**Trigger Win-Investigator automatically when Azure Monitor alerts fire — fast diagnostics without manual intervention.**
+**Trigger ServerWhisperer automatically when Azure Monitor alerts fire — fast diagnostics without manual intervention.**
 {: .fs-6 .fw-300 }
 
 ## Table of contents
@@ -21,7 +21,7 @@ description: "How to configure Win-Investigator to run automatically from Azure 
 
 ## Overview
 
-By default, Win-Investigator runs **interactively** through the Copilot CLI — you ask a question, get a report. This page explains how to extend it to run **automatically** when Azure Monitor alerts fire.
+By default, ServerWhisperer runs **interactively** through the Copilot CLI — you ask a question, get a report. This page explains how to extend it to run **automatically** when Azure Monitor alerts fire.
 
 ### When to Use Automated Investigations
 
@@ -289,10 +289,10 @@ This allows GitHub Actions to authenticate to Azure **without storing secrets in
 
 ```bash
 # Create app registration
-az ad app create --display-name "win-investigator-automation"
+az ad app create --display-name "serverwhisperer-automation"
 
 # Get the app ID (you'll need this)
-APP_ID=$(az ad app list --query "[?displayName=='win-investigator-automation'].appId" -o tsv)
+APP_ID=$(az ad app list --query "[?displayName=='serverwhisperer-automation'].appId" -o tsv)
 echo "App ID: $APP_ID"
 ```
 
@@ -329,7 +329,7 @@ Tell Azure AD to trust GitHub Actions workflows from your repository.
 ```bash
 # Get your GitHub repo details
 GITHUB_OWNER="anwather"  # Your GitHub username/org
-GITHUB_REPO="win-investigator"  # Your repo name
+GITHUB_REPO="ServerWhisperer"  # Your repo name
 
 # Create OIDC federation credential
 az ad app federated-credential create \
@@ -439,13 +439,13 @@ jobs:
           "timestamp=$timestamp" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         shell: pwsh
       
-      # Run Win-Investigator diagnostics
+      # Run ServerWhisperer diagnostics
       - name: Run diagnostics
         id: diagnostics
         run: |
           # Clone the repo with diagnostics skills
-          git clone https://github.com/${{ github.repository }}.git win-investigator
-          cd win-investigator
+          git clone https://github.com/${{ github.repository }}.git ServerWhisperer
+          cd ServerWhisperer
           
           # Example: Run an overview diagnostic
           $server = "${{ steps.alert.outputs.server }}"
@@ -458,7 +458,7 @@ jobs:
           Write-Host "Alert: ${{ steps.alert.outputs.alert_name }}"
           Write-Host "Severity: ${{ steps.alert.outputs.severity }}"
           
-          # TODO: Integrate win-investigator's diagnostic skills here
+          # TODO: Integrate ServerWhisperer's diagnostic skills here
           # For now, placeholder that shows structure
           $diagnosticResult = @{
             server = $server
@@ -503,7 +503,7 @@ jobs:
             \`\`\`
             
             ---
-            *This issue was automatically created by Win-Investigator Alert Automation workflow*
+            *This issue was automatically created by ServerWhisperer Alert Automation workflow*
             `;
             
             // Search for existing issue with same alert on same server
@@ -543,7 +543,7 @@ jobs:
 
 {: .note }
 > This is a **template workflow**. You'll need to:
-> 1. Replace placeholder diagnostic code with actual Win-Investigator skill execution
+> 1. Replace placeholder diagnostic code with actual ServerWhisperer skill execution
 > 2. Adapt to your specific server naming, credential patterns, and alert payload format
 > 3. Test in a non-production environment first
 
@@ -885,7 +885,7 @@ az role assignment create --role "Key Vault Secrets User" \
 az ad app federated-credential create --id $APP_ID --parameters '{
   "name": "github-actions",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:anwather/win-investigator:ref:refs/heads/main",
+  "subject": "repo:anwather/ServerWhisperer:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
 }'
 
@@ -912,4 +912,4 @@ az monitor metrics alert create \
 
 ---
 
-_Built by the Win-Investigator team._
+_Built by the ServerWhisperer team._

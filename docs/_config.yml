@@ -1,8 +1,8 @@
-title: Win-Investigator
+title: 🔮 ServerWhisperer
 description: "AI-driven Windows Server troubleshooting via Copilot CLI"
 remote_theme: just-the-docs/just-the-docs
 
-baseurl: "/win-investigator"
+baseurl: "/ServerWhisperer"
 url: "https://anwather.github.io"
 
 # Search
@@ -24,12 +24,12 @@ back_to_top_text: "Back to top"
 color_scheme: dark
 
 # Footer
-footer_content: "Built by the Win-Investigator team &mdash; <a href=\"https://github.com/anwather/win-investigator\">GitHub</a>"
+footer_content: "Built by the ServerWhisperer team &mdash; <a href=\"https://github.com/anwather/ServerWhisperer\">GitHub</a>"
 
 # Aux links (top-right)
 aux_links:
   "View on GitHub":
-    - "https://github.com/anwather/win-investigator"
+    - "https://github.com/anwather/ServerWhisperer"
 aux_links_new_tab: true
 
 # Heading anchor links

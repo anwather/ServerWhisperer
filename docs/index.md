@@ -2,11 +2,11 @@
 layout: default
 title: Home
 nav_order: 0
-description: "Win-Investigator — AI-driven Windows Server troubleshooting via Copilot CLI"
+description: "🔮 ServerWhisperer — AI-driven Windows Server troubleshooting via Copilot CLI"
 permalink: /
 ---
 
-# Win-Investigator
+# 🔮 ServerWhisperer
 {: .fs-9 }
 
 **Ask questions about your Windows Servers in plain English. Get answers instantly.**
@@ -15,8 +15,8 @@ permalink: /
 No complex commands. No scripts to learn. Just ask what's wrong.
 {: .fs-5 .fw-400 }
 
-[Get Started in 5 Minutes](/win-investigator/getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[View on GitHub](https://github.com/anwather/win-investigator){: .btn .fs-5 .mb-4 .mb-md-0 }
+[Get Started in 5 Minutes](/ServerWhisperer/getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[View on GitHub](https://github.com/anwather/ServerWhisperer){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
@@ -41,7 +41,7 @@ Invoke-Command $session { Get-WmiObject Win32_LogicalDisk ... }
 
 After 20 minutes: You have raw data but no insights.
 
-### ✅ The Win-Investigator Way
+### ✅ The ServerWhisperer Way
 
 You: _"server01 is slow — what's using the CPU?"_
 
@@ -50,7 +50,7 @@ gh copilot
 ? "server01 is slow — what's using the CPU?"
 ```
 
-Win-Investigator:
+ServerWhisperer:
 
 ```
 🔴 CPU Spike — Process Analysis
@@ -75,7 +75,7 @@ copilot "What's going on with server01?"
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -102,15 +102,15 @@ Next steps: Clean temp folders, then monitor memory trends.
 
 ## 10 Built-In Diagnostics
 
-Win-Investigator includes focused diagnostic skills for connectivity, server overview, disk storage, performance, processes, services, network configuration, event logs, installed applications, and Windows Server roles & features.
+ServerWhisperer includes focused diagnostic skills for connectivity, server overview, disk storage, performance, processes, services, network configuration, event logs, installed applications, and Windows Server roles & features.
 
-[See all diagnostics →](/win-investigator/diagnostics){: .btn .btn-outline }
+[See all diagnostics →](/ServerWhisperer/diagnostics){: .btn .btn-outline }
 
 ---
 
 {: .note }
-> Win-Investigator is a **diagnostic tool**, not an automation tool. It reports findings and recommends actions — it does not make changes to your servers.
+> ServerWhisperer is a **diagnostic tool**, not an automation tool. It reports findings and recommends actions — it does not make changes to your servers.
 
 ---
 
-_Built by the Win-Investigator team._
+_Built by the ServerWhisperer team._

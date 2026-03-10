@@ -2,13 +2,13 @@
 layout: default
 title: Examples
 nav_order: 4
-description: "Example Win-Investigator sessions showing real diagnostic output"
+description: "Example ServerWhisperer sessions showing real diagnostic output"
 ---
 
 # Example Sessions
 {: .no_toc }
 
-Real-world examples showing how Win-Investigator handles different scenarios.
+Real-world examples showing how ServerWhisperer handles different scenarios.
 {: .fs-6 .fw-300 }
 
 ## Table of contents
@@ -33,7 +33,7 @@ Connecting to server01 via PowerShell remoting...
 Running overview + key health checks...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -75,7 +75,7 @@ logs for archival.
 
 ## Disk Space Investigation
 
-When a server is running out of disk space, Win-Investigator identifies what's consuming it and suggests a safe cleanup sequence.
+When a server is running out of disk space, ServerWhisperer identifies what's consuming it and suggests a safe cleanup sequence.
 
 ```bash
 $ copilot "server01 is out of disk space. What can I delete?"
@@ -86,7 +86,7 @@ Parsing... server01, disk space concern, using current user credentials
 Running disk-storage diagnostic skill...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT — DISK ANALYSIS
+🔍 SERVERWHISPERER REPORT — DISK ANALYSIS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -312,4 +312,4 @@ memory leak. Consider restarting the application or increasing server RAM.
 
 ---
 
-_Built by the Win-Investigator team._
+_Built by the ServerWhisperer team._

@@ -13,7 +13,7 @@ description: "Fixes for common setup and connection issues. Start here if someth
 
 {: .important }
 > **Security Note:** Never type passwords in the Copilot CLI chat. Always create credential files 
-> using Export-Clixml **before** running `gh copilot`: `Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"`
+> using Export-Clixml **before** running `gh copilot`: `Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"`
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -127,10 +127,10 @@ Run these commands in your PowerShell session (outside of Copilot):
 
 ```powershell
 # Step 1: Create the credentials directory
-New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
+New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
 
 # Step 2: Save your credentials (opens secure GUI dialog)
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
 ```
 
 A secure Windows dialog will open. Enter your username and password there. The file will be saved with DPAPI encryption. Then start Copilot:
@@ -161,10 +161,10 @@ Delete the old file and create a new one on this machine:
 
 ```powershell
 # Delete old credential file
-Remove-Item "$HOME\.wininvestigator\credentials.xml" -ErrorAction SilentlyContinue
+Remove-Item "$HOME\.serverwhisperer\credentials.xml" -ErrorAction SilentlyContinue
 
 # Create new credential file for this user + machine
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
 ```
 
 {: .warning }
@@ -184,8 +184,8 @@ Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
 
 2. **Re-create the credential file** with the correct username and password:
    ```powershell
-   Remove-Item "$HOME\.wininvestigator\credentials.xml"
-   Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+   Remove-Item "$HOME\.serverwhisperer\credentials.xml"
+   Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
    ```
 
 3. **Check Caps Lock** is off when typing password in the credential dialog
@@ -283,7 +283,7 @@ Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
 
 ### `Error: Access denied`
 
-**Problem:** Win-Investigator can reach the server but gets "access denied" errors.
+**Problem:** ServerWhisperer can reach the server but gets "access denied" errors.
 
 **Cause:** Your user account doesn't have admin rights on the target.
 
@@ -326,7 +326,7 @@ The agent will automatically use the `$credential` for the connection.
 
 **Solution:**
 
-All Win-Investigator connections use `-SkipCACheck -SkipCNCheck`, which handles this automatically. If you see this error anyway:
+All ServerWhisperer connections use `-SkipCACheck -SkipCNCheck`, which handles this automatically. If you see this error anyway:
 
 ```powershell
 # From your machine, test with the right flags:
@@ -338,7 +338,7 @@ Test-WSMan server01 -UseSSL -Port 5986 -SessionOption $SessionOption
 
 ## After Connection Issues
 
-### `Error: Unable to connect to server01` (from Win-Investigator)
+### `Error: Unable to connect to server01` (from ServerWhisperer)
 
 **Checklist:**
 
@@ -359,7 +359,7 @@ If all of these pass, try your investigation again.
 
 ### `Error: WinRM is not responding`
 
-**Problem:** Win-Investigator times out or fails with WinRM errors.
+**Problem:** ServerWhisperer times out or fails with WinRM errors.
 
 **Solution:**
 
@@ -479,7 +479,7 @@ If all of these pass, try your investigation again.
 
 **Solution:**
 
-This is **normal and expected**. Win-Investigator is designed to handle partial failure gracefully:
+This is **normal and expected**. ServerWhisperer is designed to handle partial failure gracefully:
 
 1. **Successful diagnostics are reported normally** — you get findings for those
 2. **Failed diagnostics are noted** — report shows which ones failed and why
@@ -558,7 +558,7 @@ If your machine and target servers are on different networks (e.g., datacenter b
 
 ## Escalation Guide
 
-When Win-Investigator identifies issues but can't fix them, here's who to contact:
+When ServerWhisperer identifies issues but can't fix them, here's who to contact:
 
 | Issue | Escalate To | What to Share |
 |-------|-------------|-------------------|
@@ -570,8 +570,8 @@ When Win-Investigator identifies issues but can't fix them, here's who to contac
 | Application crash | App owner | Process name, PID, error events |
 | Network issues | Network admin | Adapter status, DNS config, open ports |
 
-Always share the Win-Investigator report — it gives the specific data responders need.
+Always share the ServerWhisperer report — it gives the specific data responders need.
 
 ---
 
-_Built by the Win-Investigator team._
+_Built by the ServerWhisperer team._

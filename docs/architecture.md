@@ -2,13 +2,13 @@
 layout: default
 title: Architecture
 nav_order: 6
-description: "How Win-Investigator works — architecture, skill pipeline, and design decisions"
+description: "How ServerWhisperer works — architecture, skill pipeline, and design decisions"
 ---
 
 # Architecture
 {: .no_toc }
 
-How Win-Investigator works under the hood — for contributors and the curious.
+How ServerWhisperer works under the hood — for contributors and the curious.
 {: .fs-6 .fw-300 }
 
 ## Table of contents
@@ -21,7 +21,7 @@ How Win-Investigator works under the hood — for contributors and the curious.
 
 ## Overview
 
-Win-Investigator is a Copilot CLI agent that uses a **skill-based modular architecture** with a single orchestrator. The intelligence layer (Copilot agent) interprets user questions and selects diagnostics, while the execution layer (PowerShell skills) collects data from remote servers.
+ServerWhisperer is a Copilot CLI agent that uses a **skill-based modular architecture** with a single orchestrator. The intelligence layer (Copilot agent) interprets user questions and selects diagnostics, while the execution layer (PowerShell skills) collects data from remote servers.
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -31,7 +31,7 @@ Win-Investigator is a Copilot CLI agent that uses a **skill-based modular archit
                        │
                        ▼
 ┌─────────────────────────────────────────────────┐
-│  Win-Investigator Agent                         │
+│  ServerWhisperer Agent                          │
 │  • Parse question → Identify server & concern   │
 │  • Route to appropriate diagnostic skill        │
 │  • Handle credentials (current user / explicit) │
@@ -77,7 +77,7 @@ Win-Investigator is a Copilot CLI agent that uses a **skill-based modular archit
 
 ### Intelligence vs. Execution
 
-Win-Investigator separates concerns into two layers:
+ServerWhisperer separates concerns into two layers:
 
 | Layer | Responsibility | Technology |
 |-------|---------------|------------|
@@ -282,7 +282,7 @@ foreach ($job in $jobs) {
 
 ## Why PowerShell Remoting?
 
-Win-Investigator uses PowerShell remoting (WinRM) because:
+ServerWhisperer uses PowerShell remoting (WinRM) because:
 
 | Benefit | Detail |
 |---------|--------|
@@ -296,7 +296,7 @@ Win-Investigator uses PowerShell remoting (WinRM) because:
 
 ## Automation
 
-While Win-Investigator is designed for **interactive use**, it can be extended to run **automatically from Azure Monitor alerts** via GitHub Actions.
+While ServerWhisperer is designed for **interactive use**, it can be extended to run **automatically from Azure Monitor alerts** via GitHub Actions.
 
 ### Alert-Triggered Architecture
 
@@ -333,7 +333,7 @@ See [Automated Investigations]({{ site.baseurl }}/automation.md) for the complet
 ## Project Structure
 
 ```
-win-investigator/
+ServerWhisperer/
 ├── .github/
 │   ├── agents/               # Agent definition files
 │   ├── copilot-instructions.md  # Main agent instructions
@@ -358,15 +358,15 @@ win-investigator/
 
 ## Contributing
 
-Win-Investigator welcomes contributions. Key areas:
+ServerWhisperer welcomes contributions. Key areas:
 
 - **New diagnostic skills** — Add a new `skills/{name}/SKILL.md` with code patterns and interpretation guidance
 - **Improve existing skills** — Add edge cases, better error handling, new checks
 - **Documentation** — Improve this docs site, add examples, fix typos
 - **Testing** — Validate diagnostics against real Windows Server environments
 
-See the [GitHub repository](https://github.com/anwather/win-investigator) for issues and pull requests.
+See the [GitHub repository](https://github.com/anwather/ServerWhisperer) for issues and pull requests.
 
 ---
 
-_Built by the Win-Investigator team._
+_Built by the ServerWhisperer team._
