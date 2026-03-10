@@ -1,0 +1,26 @@
+{
+  "name": "server-whisperer",
+  "description": "🔮 ServerWhisperer — AI-driven Windows Server troubleshooting agent. Ask natural language questions about your servers and get structured diagnostic reports.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthony Watherston"
+  },
+  "license": "MIT",
+  "keywords": ["windows", "server", "troubleshooting", "powershell", "diagnostics", "azure"],
+  "agents": [
+    ".github/agents/server-whisperer.md"
+  ],
+  "skills": [
+    "skills/azure-connectivity/",
+    "skills/connectivity/",
+    "skills/disk-storage/",
+    "skills/event-logs/",
+    "skills/installed-apps/",
+    "skills/network/",
+    "skills/performance/",
+    "skills/processes/",
+    "skills/roles-features/",
+    "skills/server-overview/",
+    "skills/services/"
+  ]
+}
