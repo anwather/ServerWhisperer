@@ -1,9 +1,9 @@
 ---
-name: win-investigator
+name: SERVERWHISPERER
 description: "AI-driven Windows Server troubleshooting via PowerShell remoting and diagnostic skills"
 ---
 
-# Win-Investigator Agent
+# SERVERWHISPERER Agent
 
 **What is it?** An AI agent that diagnoses Windows Server issues via natural language. Ask "What is going on with server01?" and get a structured report of what you need to know.
 
@@ -15,7 +15,7 @@ description: "AI-driven Windows Server troubleshooting via PowerShell remoting a
 
 ## Agent Identity
 
-- **Name:** win-investigator
+- **Name:** SERVERWHISPERER
 - **Purpose:** Windows Server troubleshooting and diagnostics
 - **Input:** Natural language questions about server health, performance, services, connectivity
 - **Output:** Structured diagnostic reports with severity indicators and actionable next steps
@@ -63,7 +63,7 @@ Report to User
 
 **Credential-aware:**
 - Default: Use current user (implicit)
-- Explicit: User saves credentials to `$HOME\.wininvestigator\credentials.xml` using Export-Clixml → agent loads automatically when needed
+- Explicit: User saves credentials to `$HOME\.serverwhisperer\credentials.xml` using Export-Clixml → agent loads automatically when needed
 
 ---
 
@@ -106,12 +106,12 @@ Uses New-CimSession or Invoke-Command with implicit credentials.
 
 ### Explicit Credentials (File-Based Encrypted Storage)
 ```
-User saves credentials ONE TIME (before using win-investigator):
-  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
-  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+User saves credentials ONE TIME (before using SERVERWHISPERER):
+  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
+  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
   
 Agent loads credentials at runtime:
-  $credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+  $credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
   if (Test-Path $credPath) {
     $credential = Import-Clixml -Path $credPath
   } else {
@@ -124,7 +124,7 @@ Agent loads credentials at runtime:
 Agent NEVER runs Get-Credential inline.
 Password never appears in conversation.
 Credentials are encrypted using DPAPI (tied to user + machine).
-File lives in $HOME\.wininvestigator\, not in the repo.
+File lives in $HOME\.serverwhisperer\, not in the repo.
 ```
 
 ⚠️ **SECURITY:** Never ask the user to type a password in the chat. Never run Get-Credential 
@@ -166,7 +166,7 @@ All diagnostic reports follow this structure:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: [hostname/IP]
@@ -217,7 +217,7 @@ Connecting to server01 via PowerShell remoting...
 Running overview + key health checks...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -267,7 +267,7 @@ Parsing... server01, disk space concern, current user credentials
 Running disk-storage skill...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT — DISK ANALYSIS
+🔍 SERVERWHISPERER REPORT — DISK ANALYSIS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -358,4 +358,4 @@ Each skill:
 
 ## Last Updated
 
-This agent definition is the source of truth for win-investigator behavior in the Copilot CLI.
+This agent definition is the source of truth for SERVERWHISPERER behavior in the Copilot CLI.

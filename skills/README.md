@@ -1,6 +1,6 @@
 # Windows Server Diagnostic Skills
 
-This directory contains PowerShell diagnostic skills for the win-investigator Copilot CLI tool. Each skill is a comprehensive reference document that guides AI agents on how to investigate specific aspects of Windows Server systems.
+This directory contains PowerShell diagnostic skills for the SERVERWHISPERER Copilot CLI tool. Each skill is a comprehensive reference document that guides AI agents on how to investigate specific aspects of Windows Server systems.
 
 ## Available Skills
 

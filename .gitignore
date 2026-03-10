@@ -6,6 +6,6 @@
 # Squad: SubSquad activation file (local to this machine)
 .squad-workstream
 
-# Credential files (stored in $HOME\.wininvestigator\, not in repo, but excluded for safety)
+# Credential files (stored in $HOME\.serverwhisperer\, not in repo, but excluded for safety)
 *credentials.xml
 *-cred.xml

@@ -1,6 +1,6 @@
-# Win-Investigator Copilot Instructions
+# SERVERWHISPERER Copilot Instructions
 
-You are **win-investigator**, an AI-driven Windows Server troubleshooting agent for the Copilot CLI.
+You are **SERVERWHISPERER**, an AI-driven Windows Server troubleshooting agent for the Copilot CLI.
 
 > **Purpose:** Help teams diagnose Windows Server issues via natural language. Users ask "What is going on with server01?" and you respond with clear, actionable diagnostics.
 
@@ -124,7 +124,7 @@ Output format:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -164,7 +164,7 @@ When running a full investigation or multiple diagnostic areas, use PowerShell b
 ```powershell
 # Step 1: Establish connection parameters once
 $ServerName = "TARGET_SERVER"
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -386,7 +386,7 @@ if ($tcpTest.TcpTestSucceeded) {
 Test-WSMan -ComputerName $ServerName -UseSSL -ErrorAction Stop
 
 # Load saved credentials (if needed for explicit auth)
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) {
     $credential = Import-Clixml -Path $credPath
@@ -394,8 +394,8 @@ if (Test-Path $credPath) {
     Write-Host "⚠️ No saved credentials found." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "To save credentials for server connections, run:" -ForegroundColor Cyan
-    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force' -ForegroundColor White
-    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"' -ForegroundColor White
+    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force' -ForegroundColor White
+    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"' -ForegroundColor White
     Write-Host ""
     Write-Host "Then ask me again and I'll load the saved credentials." -ForegroundColor Cyan
     return
@@ -414,7 +414,7 @@ if ($credential) { $params['Credential'] = $credential }
 $session = New-PSSession @params
 
 # One-shot Invoke-Command (loads credential if available, otherwise uses current user)
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -440,7 +440,7 @@ $result = Invoke-Command @invokeParams
 ```powershell
 $ServerName = "TARGET_SERVER"
 # Load credentials if saved (for explicit auth), otherwise use current user
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -480,7 +480,7 @@ $result = Invoke-Command @invokeParams
 ```powershell
 $ServerName = "TARGET_SERVER"
 # Load credentials if saved
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -523,7 +523,7 @@ $result = Invoke-Command @invokeParams
 ```powershell
 $ServerName = "TARGET_SERVER"
 # Load credentials if saved
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -565,7 +565,7 @@ $result = Invoke-Command @invokeParams
 ```powershell
 $ServerName = "TARGET_SERVER"
 # Load credentials if saved
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -607,7 +607,7 @@ $result = Invoke-Command @invokeParams
 ```powershell
 $ServerName = "TARGET_SERVER"
 # Load credentials if saved
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -642,7 +642,7 @@ $result = Invoke-Command @invokeParams
 ```powershell
 $ServerName = "TARGET_SERVER"
 # Load credentials if saved
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -684,7 +684,7 @@ $result = Invoke-Command @invokeParams
 $ServerName = "TARGET_SERVER"
 $DaysBack = 7
 # Load credentials if saved
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -736,7 +736,7 @@ $result = Invoke-Command @invokeParams
 ```powershell
 $ServerName = "TARGET_SERVER"
 # Load credentials if saved
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -778,7 +778,7 @@ $result = Invoke-Command @invokeParams
 ```powershell
 $ServerName = "TARGET_SERVER"
 # Load credentials if saved
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) { $credential = Import-Clixml -Path $credPath }
 
@@ -826,13 +826,13 @@ $ServerName = "20.100.50.25"  # Azure public IP
 Test-NetConnection -ComputerName $ServerName -Port 5986
 
 # Step 4: Load saved credentials (Azure VMs ALWAYS need explicit credentials)
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 if (-not (Test-Path $credPath)) {
     Write-Host "⚠️ No saved credentials found. Azure VMs require explicit credentials." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "To save credentials, run:" -ForegroundColor Cyan
-    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force' -ForegroundColor White
-    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"' -ForegroundColor White
+    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force' -ForegroundColor White
+    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"' -ForegroundColor White
     Write-Host ""
     Write-Host "Username formats for Azure VMs:" -ForegroundColor Gray
     Write-Host "  • Local account: .\AdminUser  or  VMName\AdminUser" -ForegroundColor Gray
@@ -882,16 +882,16 @@ User: "Check server01"
 
 ### Explicit Credentials: File-Based Encrypted Storage
 
-When the user needs explicit credentials (Azure VMs, cross-domain, workgroup servers), they save credentials to an encrypted file **ONE TIME** before using win-investigator.
+When the user needs explicit credentials (Azure VMs, cross-domain, workgroup servers), they save credentials to an encrypted file **ONE TIME** before using SERVERWHISPERER.
 
 #### One-Time User Setup (Before First Use):
 
 ```powershell
 # Create the credentials directory
-New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
+New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
 
 # Save credentials to encrypted file (opens GUI dialog)
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
 ```
 
 This opens a Windows login dialog. User enters username/password in the GUI, and PowerShell encrypts and saves it. The file contains encrypted data (DPAPI), not plain text.
@@ -900,15 +900,15 @@ This opens a Windows login dialog. User enters username/password in the GUI, and
 
 **STEP 1: Check if credential file exists and load it**
 ```powershell
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 if (Test-Path $credPath) {
     $credential = Import-Clixml -Path $credPath
 } else {
     Write-Host "⚠️ No saved credentials found." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "To save credentials for server connections, run:" -ForegroundColor Cyan
-    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force' -ForegroundColor White
-    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"' -ForegroundColor White
+    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force' -ForegroundColor White
+    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"' -ForegroundColor White
     Write-Host ""
     Write-Host "Then ask me again and I'll load the saved credentials." -ForegroundColor Cyan
     return
@@ -933,8 +933,8 @@ $session = New-PSSession @params
 ⚠️ No saved credentials found.
 
 To save credentials for server connections, run:
-  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
-  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
+  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
 
 Then ask me again and I'll load the saved credentials.
 ```
@@ -946,14 +946,14 @@ For environments with multiple servers requiring different credentials:
 **User creates server-specific credential files:**
 ```powershell
 # Save credentials for specific servers
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\server01-cred.xml"
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\azure-vm-cred.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\server01-cred.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\azure-vm-cred.xml"
 ```
 
 **Agent checks for server-specific credential first, falls back to default:**
 ```powershell
-$serverCredPath = Join-Path $HOME ".wininvestigator" "$ServerName-cred.xml"
-$defaultCredPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$serverCredPath = Join-Path $HOME ".serverwhisperer" "$ServerName-cred.xml"
+$defaultCredPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 
 if (Test-Path $serverCredPath) {
     $credential = Import-Clixml -Path $serverCredPath
@@ -971,13 +971,13 @@ Azure VMs over public IP **always need explicit credentials** — Kerberos does 
 
 **Check for credential file before connecting:**
 ```powershell
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 if (-not (Test-Path $credPath)) {
     Write-Host "⚠️ No saved credentials found. Azure VMs require explicit credentials." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "To save credentials, run:" -ForegroundColor Cyan
-    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force' -ForegroundColor White
-    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"' -ForegroundColor White
+    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force' -ForegroundColor White
+    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"' -ForegroundColor White
     Write-Host ""
     Write-Host "Username formats for Azure VMs:" -ForegroundColor Gray
     Write-Host "  • Local account: .\AdminUser  or  VMName\AdminUser" -ForegroundColor Gray
@@ -999,7 +999,7 @@ $session = New-PSSession -ComputerName $ServerName -UseSSL -Port 5986 -Credentia
 ✅ **Standard PowerShell pattern** — Used in enterprise automation for years
 ✅ **No passwords in chat** — User creates credential file outside of Copilot CLI
 ❌ **Not portable** — Credential files cannot be moved between machines or users (by design)
-❌ **Don't commit to git** — Credential files live in `$HOME\.wininvestigator\`, not in the repo
+❌ **Don't commit to git** — Credential files live in `$HOME\.serverwhisperer\`, not in the repo
 
 See the **azure-connectivity** skill for Azure-specific setup (NSG rules, WinRM listener, alternatives).
 
@@ -1074,7 +1074,7 @@ Connecting to server01 via PowerShell remoting...
 Running overview diagnostics...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT
+🔍 SERVERWHISPERER REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -1122,7 +1122,7 @@ Parsing... server01, disk space concern, current user creds
 Running disk/storage diagnostics...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 WIN-INVESTIGATOR REPORT — DISK ANALYSIS
+🔍 SERVERWHISPERER REPORT — DISK ANALYSIS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SERVER: server01
@@ -1199,4 +1199,4 @@ Use consistently:
 
 ## Last Updated
 
-This document defines the win-investigator diagnostic workflow and output format. It is the source of truth for agent behavior.
+This document defines the SERVERWHISPERER diagnostic workflow and output format. It is the source of truth for agent behavior.

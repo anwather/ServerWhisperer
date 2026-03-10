@@ -28,24 +28,24 @@ For domain-joined machines accessing domain servers, no credential file is neede
 ONE-TIME USER SETUP (before first use):
 ```powershell
 # Create credentials directory
-New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
+New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
 
 # Save credentials to encrypted file (opens GUI dialog)
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
 ```
 
 AGENT RUNTIME PATTERN:
 ```powershell
 # Load saved credentials
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 if (Test-Path $credPath) {
     $credential = Import-Clixml -Path $credPath
 } else {
     Write-Host "⚠️ No saved credentials found." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "To save credentials for server connections, run:" -ForegroundColor Cyan
-    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force' -ForegroundColor White
-    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"' -ForegroundColor White
+    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force' -ForegroundColor White
+    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"' -ForegroundColor White
     Write-Host ""
     Write-Host "Then ask me again and I'll load the saved credentials." -ForegroundColor Cyan
     return
@@ -66,11 +66,11 @@ $session = New-PSSession @params
 **Server-specific credentials (multiple servers):**
 ```powershell
 # Save server-specific credentials (user does this one time)
-Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\server01-cred.xml"
+Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\server01-cred.xml"
 
 # Agent checks for server-specific credential first, falls back to default
-$serverCredPath = Join-Path $HOME ".wininvestigator" "$ServerName-cred.xml"
-$defaultCredPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$serverCredPath = Join-Path $HOME ".serverwhisperer" "$ServerName-cred.xml"
+$defaultCredPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 
 if (Test-Path $serverCredPath) {
     $credential = Import-Clixml -Path $serverCredPath
@@ -128,7 +128,7 @@ try {
 $ServerName = "TARGET_SERVER"  # Hostname or IP address
 
 # Load saved credentials (if file exists)
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) {
     $credential = Import-Clixml -Path $credPath
@@ -136,8 +136,8 @@ if (Test-Path $credPath) {
     Write-Host "⚠️ No saved credentials found." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "To save credentials for server connections, run:" -ForegroundColor Cyan
-    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force' -ForegroundColor White
-    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"' -ForegroundColor White
+    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force' -ForegroundColor White
+    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"' -ForegroundColor White
     Write-Host ""
     Write-Host "Then ask me again and I'll load the saved credentials." -ForegroundColor Cyan
     return
@@ -194,7 +194,7 @@ try {
 $ServerName = "TARGET_SERVER"
 
 # Load credentials if saved, otherwise use current user (implicit)
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) {
     $credential = Import-Clixml -Path $credPath
@@ -232,7 +232,7 @@ try {
 $ServerName = "TARGET_SERVER"
 
 # Load saved credentials if available
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 $credential = $null
 if (Test-Path $credPath) {
     $credential = Import-Clixml -Path $credPath
@@ -290,7 +290,7 @@ try {
 3. **Never type passwords in chat** — User creates credential file outside of Copilot CLI
 4. **SkipCACheck / SkipCNCheck** — Bypasses certificate validation for self-signed certs; acceptable for known servers you control
 5. **IP addresses supported** — Connect directly to IPs without TrustedHosts modification
-6. **Credentials stored securely** — Encrypted files in `$HOME\.wininvestigator\`, not in the repo
+6. **Credentials stored securely** — Encrypted files in `$HOME\.serverwhisperer\`, not in the repo
 7. **For production** — Consider CA-issued certificates and removing Skip flags
 
 ## WinRM HTTPS Setup on Target

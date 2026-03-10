@@ -29,10 +29,10 @@ Establish PowerShell remoting sessions to Azure VMs accessed via public IP addre
 ### On the Client Machine (your workstation)
 
 1. **Explicit credentials ready** — Kerberos does not work over public IP. User must save credentials 
-   to an encrypted file BEFORE using win-investigator:
+   to an encrypted file BEFORE using SERVERWHISPERER:
    ```powershell
-   New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force
-   Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"
+   New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force
+   Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"
    ```
 2. No TrustedHosts modification needed — `-SkipCACheck` and `-SkipCNCheck` handle certificate validation
 
@@ -140,13 +140,13 @@ try {
 $ServerName = "20.100.50.25"  # Azure VM public IP or hostname
 
 # Load saved credentials (Azure VMs ALWAYS require explicit credentials)
-$credPath = Join-Path $HOME ".wininvestigator" "credentials.xml"
+$credPath = Join-Path $HOME ".serverwhisperer" "credentials.xml"
 if (-not (Test-Path $credPath)) {
     Write-Host "⚠️ No saved credentials found. Azure VMs require explicit credentials." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "To save credentials, run:" -ForegroundColor Cyan
-    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.wininvestigator" -Force' -ForegroundColor White
-    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.wininvestigator\credentials.xml"' -ForegroundColor White
+    Write-Host '  New-Item -ItemType Directory -Path "$HOME\.serverwhisperer" -Force' -ForegroundColor White
+    Write-Host '  Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"' -ForegroundColor White
     Write-Host ""
     Write-Host "Username formats for Azure VMs:" -ForegroundColor Gray
     Write-Host "  • Local account: .\AdminUser  or  VMName\AdminUser" -ForegroundColor Gray
