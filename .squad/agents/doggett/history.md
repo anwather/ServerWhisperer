@@ -145,3 +145,50 @@ Site is live and deployed. All 7 documentation pages are publicly accessible via
 - Use of just-the-docs callouts for emphasis
 
 **Tone:** Conversational, empathetic to non-technical users. Assumes zero knowledge of Copilot CLI, PowerShell remoting, or GitHub CLI.
+
+---
+
+### Plugin Install as Primary Method Documentation Update (2026-03-10T1645)
+
+**Requested by:** Anthony Watherston  
+**Priority:** Update docs to feature plugin install as recommended method  
+**Outcome:** SUCCESS
+
+**Context:** ServerWhisperer now supports direct installation as a Copilot CLI plugin (`/plugin install anwather/ServerWhisperer`), which is faster and simpler than cloning. Documentation needed restructuring to make this the primary path.
+
+**Files updated:**
+
+1. **README.md — Quick Start Section**
+   - Changed headline from "5 Minutes" to "2 Minutes" (now plugin-first)
+   - Added "Install as Plugin (Recommended) ⭐" as the PRIMARY method with simple 2-step flow:
+     - `copilot`
+     - `/plugin install anwather/ServerWhisperer`
+   - Moved clone method to "Alternative: Clone & Setup" with full 6-step instructions
+   - Added credential setup note (Azure VMs and non-domain servers need `Get-Credential | Export-Clixml` setup)
+
+2. **docs/getting-started.md — Major Restructure**
+   - Added "Install as Plugin (Recommended) ⭐" section BEFORE clone instructions
+   - Prerequisites section for plugin method (GitHub CLI + auth)
+   - 3-step plugin flow: Launch Copilot CLI → Install plugin → Ask question
+   - Moved all existing Steps 0-5 to "Alternative: Clone & Setup from Repository" with subsections
+   - Clarified credential notes: automatic for domain-joined, explicit setup for Azure/non-domain
+
+3. **docs/index.md — Landing Page Update**
+   - Added "⚡ Install Now (30 Seconds)" section right after CTAs
+   - Shows quick plugin install flow as the fastest path
+   - Links to full getting-started.md for detailed instructions
+   - Maintains all existing content (value prop, examples, diagnostics overview)
+
+**Key patterns applied:**
+- Plugin method is featured first and framed as "Recommended ⭐"
+- Clone method retained but repositioned as alternative for development/advanced use
+- All examples use `ServerWhisperer` branding with 🔮 emoji
+- Credential setup explained clearly: default (domain-joined, no setup) vs explicit (Azure VMs, requires setup outside Copilot CLI)
+- Callouts clarify that credentials for Azure VMs must be pre-created with: `Get-Credential | Export-Clixml -Path "$HOME\.serverwhisperer\credentials.xml"`
+- Plugin method section emphasizes "all diagnostic skills are built-in" — no separate skill installation needed
+
+**Documentation pattern established:**
+- Plugin install is now the entry point for users
+- Clone method supports development and advanced customization use cases
+- Both flows are documented end-to-end with exact commands and expected outputs
+- User never has to leave one section wondering "what's the next step?"

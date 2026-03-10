@@ -466,3 +466,25 @@ $jobs.Values | Remove-Job -Force -ErrorAction SilentlyContinue
 **Outcome:** SUCCESS. Full investigations now complete in ~30-60 seconds instead of 2-3 minutes. Agent can run all diagnostics in parallel with incremental progress reporting.
 
 ---
+
+### 2026-03-10 - Copilot CLI Plugin Manifest Created
+
+**Created `.github/plugin/plugin.json`** — the plugin manifest that enables `/plugin install anwather/ServerWhisperer`.
+
+**Manifest structure:**
+- `name`: kebab-case plugin identifier (`server-whisperer`)
+- `description`: user-facing description shown during install
+- `version`: semver (`1.0.0`)
+- `author`: object with `name` field
+- `license`: SPDX identifier
+- `keywords`: array of discovery tags
+- `agents`: array of paths to agent markdown files (relative to repo root)
+- `skills`: array of paths to skill directories (relative to repo root, trailing slash)
+
+**Key details:**
+- File lives at `.github/plugin/plugin.json` — standard Copilot CLI convention
+- References 1 agent: `.github/agents/server-whisperer.md`
+- References 11 skill directories under `skills/`
+- All referenced paths verified to exist before commit
+
+---
