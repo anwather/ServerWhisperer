@@ -417,6 +417,122 @@ $cred = Get-StoredCredential -Target "server01"
 
 ---
 
+### 14. Decision: Alert-to-Diagnosis Automation Pipeline
+
+**Author:** Scully (Lead/Architect)  
+**Date:** 2026-03-10  
+**Status:** Proposed  
+**Requested by:** Anthony Watherston  
+
+**Summary:** End-to-end automation pipeline: Azure Monitor alert → AI root cause diagnosis.
+
+**Architecture:**
+- **Ingestion:** Azure Monitor → Action Groups → Event Grid (durable routing, fan-out, severity filtering)
+- **Orchestration:** Azure Durable Functions (PowerShell) — code-first, fan-out/fan-in for parallel diagnostics
+- **Hybrid Execution:**
+  - Azure VMs: `Invoke-AzVMRunCommand` (no WinRM, Managed Identity, through fabric)
+  - On-prem: Azure Automation Hybrid Runbook Worker → WinRM HTTPS/5986
+- **AI Analysis:** Azure OpenAI GPT-4o with structured diagnostic data → root cause + remediation
+- **Reporting:** Teams Adaptive Cards (severity-routed), Blob Storage (full reports), Log Analytics (trending)
+- **Security:** Managed Identity everywhere, zero stored credentials in pipeline
+
+**Key Design Decisions:**
+- Durable Functions over Logic Apps: PowerShell-native, testable, fan-out/fan-in matches existing parallel job pattern
+- Event Grid over direct webhook: retry, fan-out, filtering, dead-letter
+- Run Command needs JSON serialization wrapper (returns text, 4KB stdout limit)
+- Existing `src/diagnostics/` scripts reused in both interactive and automated paths
+- Phased implementation: MVP (Azure VMs) → Hybrid (on-prem) → Intelligence (RAG, auto-remediation) → Observability
+
+**Cost Estimate:** ~$25-35/month for 100 investigations (Consumption plan, event-driven, no idle cost)
+
+**Open Questions:**
+- Bundle diagnostics into single Run Command per VM vs separate invocations?
+- Auto-remediation scope — which actions are safe without human approval?
+- Consumption vs Premium Function plan (cold start tradeoff)?
+- On-prem network topology — VPN/ExpressRoute available or Hybrid Worker only?
+
+---
+
+### 15. Decision: Pivot Intelligence Layer to Microsoft Foundry Agent
+
+**Author:** Scully (Lead/Architect)  
+**Date:** 2026-03-12  
+**Status:** Proposed  
+**Requested by:** Anthony Watherston  
+**Supersedes:** Section 3.5 of Decision #14 (raw Azure OpenAI chat completions)
+
+**Context:** The v1 automation pipeline architecture used raw Azure OpenAI chat completion calls for AI analysis. This works but is stateless — no memory of past investigations, no tool-calling during analysis, no knowledge base.
+
+**Decision:** Replace raw Azure OpenAI chat completion calls with a **Microsoft Foundry Agent** (`serverwhisperer-diagnostician`) that provides:
+
+1. **Persistent agent definition** — system prompt, model, and behavior configured once (not per-call)
+2. **Tool definitions** — the agent can call functions during analysis:
+   - `query_resource_graph` — VM metadata, tags, size, related resources
+   - `check_vm_power_state` — power state + recent restart history
+   - `query_activity_log` — control-plane events (deallocations, maintenance, Spot evictions)
+3. **Knowledge base (RAG)** — Azure AI Search index over past investigation reports, enabling the agent to detect recurring patterns and reference historical context
+4. **Conversation threads** — stateful investigation context per alert
+
+The Durable Function remains the orchestrator: it collects diagnostics via Run Command, then creates a thread with the Foundry agent, sends diagnostic data, handles any tool call requests, and retrieves the analysis.
+
+**Also Decided: Demo Infrastructure (Bicep IaC)**
+
+Phase 1 is now a **deployable demo**, not just an architecture document. The Bicep IaC deploys:
+
+- Target Windows VM (Server 2022, WinRM HTTPS via CustomScriptExtension)
+- Azure Monitor alert rules (CPU, disk, memory)
+- Action Group → Event Grid → Durable Function (Flex Consumption)
+- AI Foundry project + agent + model deployment
+- Azure AI Search (knowledge base index)
+- Storage account, Key Vault
+- Load simulation scripts
+
+One deployment command + two post-deploy scripts → stress VM → watch diagnosis arrive in Teams.
+
+**Rationale:**
+
+| Factor | Raw OpenAI | Foundry Agent |
+|--------|-----------|---------------|
+| Knowledge base (RAG) | Build from scratch | Native AI Search integration |
+| Tool calling | Manual implementation | Built-in, agent-managed |
+| Historical memory | None | Via knowledge base index |
+| System prompt | Repeated per call | Configured once on agent |
+| Conversation state | Stateless | Persistent threads |
+| Observability | DIY logging | Built-in Foundry metrics |
+
+The agent abstraction is the right level. We'd end up building half of what Foundry provides if we stayed on raw OpenAI.
+
+**Implications:**
+- **Mulder:** Implement the `AnalyzeWithFoundryAgent` activity function with tool-call handling loop
+- **Doggett:** Update architecture docs to reflect Foundry agent; document demo deployment steps
+- **Skinner:** Test the full demo flow: deploy → stress → alert → diagnosis → Teams
+- **All agents:** Foundry agent creation is a post-deployment script (not Bicep-native yet)
+
+**Risks:**
+1. **Foundry agent API maturity** — API may change; we're early adopters. Mitigated by abstracting behind the activity function.
+2. **Bicep gap** — Agent creation isn't Bicep-native. Requires PowerShell post-deploy script.
+3. **Cost increase** — AI Search adds ~$25/month at Basic tier for production. Free tier sufficient for demo.
+4. **Tool call latency** — Agent may call 1-3 tools per investigation, adding 5-15 seconds. Acceptable for async pipeline.
+
+**Alternatives Rejected:**
+1. **Stay on raw OpenAI** — Works but no knowledge base, no tools, no memory. We'd rebuild what Foundry offers.
+2. **Semantic Kernel orchestration** — More flexible but adds C#/.NET dependency to a PowerShell-native project.
+3. **LangChain/Python agent** — Wrong language for the stack. All existing code is PowerShell.
+
+---
+
+### 16. User Directive: 2026-03-11T23:35:42Z
+
+**By:** Anthony Watherston (via Copilot)  
+
+**What:** Use Microsoft Foundry agents for the AI/intelligence layer instead of raw Azure OpenAI calls. Create demo infrastructure (IaC) that can be stood up to demonstrate the full alert-to-diagnosis flow.
+
+**Why:** User request — captured for team memory
+
+**Outcome:** Implemented via Decision #15 (Foundry Agent pivot + Bicep demo infrastructure)
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus
