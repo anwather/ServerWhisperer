@@ -34,7 +34,7 @@ function Get-FoundryEndpoint {
 }
 
 $foundryEndpoint = Get-FoundryEndpoint
-$token = az account get-access-token --resource https://management.azure.com --query accessToken -o tsv
+$token = az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv
 
 if (-not $token) {
     throw 'Failed to acquire Azure CLI access token.'
@@ -131,7 +131,7 @@ $headers = @{
 }
 
 try {
-    $response = Invoke-RestMethod -Method Post -Uri "$foundryEndpoint/agents/v1.0/assistants" -Headers $headers -Body ($body | ConvertTo-Json -Depth 10) -ErrorAction Stop
+    $response = Invoke-RestMethod -Method Post -Uri "$foundryEndpoint/openai/assistants?api-version=2024-07-01-preview" -Headers $headers -Body ($body | ConvertTo-Json -Depth 10) -ErrorAction Stop
 } catch {
     throw "Foundry agent creation failed. $($_.Exception.Message)"
 }

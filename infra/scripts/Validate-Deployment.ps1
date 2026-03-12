@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Post-deployment smoke test for ServerWhisperer Alert-to-Diagnosis Pipeline.
 
@@ -63,10 +63,10 @@ function Add-CheckResult {
     
     if ($Passed) {
         $script:passedCount++
-        Write-Host "[✅] $Name`: $Message" -ForegroundColor Green
+        Write-Host "[[PASS]] $Name`: $Message" -ForegroundColor Green
     } else {
         $script:failedCount++
-        Write-Host "[❌] $Name`: $Message" -ForegroundColor Red
+        Write-Host "[[FAIL]] $Name`: $Message" -ForegroundColor Red
         if ($Recommendation) {
             Write-Host "     → $Recommendation" -ForegroundColor Yellow
         }
@@ -75,14 +75,14 @@ function Add-CheckResult {
 
 function Test-CheckSkipped {
     param([string]$Name, [string]$Reason)
-    Write-Host "[⏭️] $Name`: $Reason" -ForegroundColor Cyan
+    Write-Host "[[SKIP]] $Name`: $Reason" -ForegroundColor Cyan
 }
 
 # Print header
 Write-Host ""
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
-Write-Host "🔍 DEPLOYMENT VALIDATION" -ForegroundColor Cyan
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+Write-Host "===============================================" -ForegroundColor Cyan
+Write-Host "[CHECK] DEPLOYMENT VALIDATION" -ForegroundColor Cyan
+Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Resource Group: $ResourceGroup"
 Write-Host "Prefix: $ResourcePrefix"
@@ -97,9 +97,9 @@ $searchServiceName = "$ResourcePrefix-search"
 $actionGroupName = "ServerWhisperer-AG"
 
 try {
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 1. Resource Group exists
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking resource group..."
     try {
         $rg = Get-AzResourceGroup -Name $ResourceGroup -ErrorAction Stop
@@ -111,9 +111,9 @@ try {
         throw "Resource group not found. Cannot continue validation."
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 2. VM is running
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking VM status..."
     $vm = Get-AzVM -ResourceGroupName $ResourceGroup -Name $vmName -Status -ErrorAction SilentlyContinue
     if ($vm) {
@@ -129,9 +129,9 @@ try {
             -Recommendation "Check deployment or VM name"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 3. VM has system-assigned managed identity
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking VM managed identity..."
     $vmDetail = Get-AzVM -ResourceGroupName $ResourceGroup -Name $vmName -ErrorAction SilentlyContinue
     if ($vmDetail -and $vmDetail.Identity -and $vmDetail.Identity.Type -match 'SystemAssigned') {
@@ -141,9 +141,9 @@ try {
             -Recommendation "Enable in Bicep: identity: { type: 'SystemAssigned' }"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 4. Function App is running
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking Function App..."
     $funcApps = Get-AzWebApp -ResourceGroupName $ResourceGroup | Where-Object { $_.Kind -like '*functionapp*' }
     if ($funcApps.Count -gt 0) {
@@ -160,9 +160,9 @@ try {
             -Recommendation "Check deployment or function app name pattern"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 5. Function App has correct app settings
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking Function App settings..."
     if ($funcApp) {
         $appSettings = Get-AzWebApp -ResourceGroupName $ResourceGroup -Name $funcApp.Name | 
@@ -186,9 +186,9 @@ try {
         }
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 6. Alert rules are active
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking alert rules..."
     $alertRules = Get-AzMetricAlertRuleV2 -ResourceGroupName $ResourceGroup -ErrorAction SilentlyContinue
     if ($alertRules.Count -ge 3) {
@@ -204,9 +204,9 @@ try {
             -Recommendation "Check monitoring.bicep deployment"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 7. Action Group exists and has webhook
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking Action Group..."
     $actionGroups = Get-AzActionGroup -ResourceGroupName $ResourceGroup -ErrorAction SilentlyContinue
     if ($actionGroups.Count -gt 0) {
@@ -221,9 +221,9 @@ try {
             -Recommendation "Check monitoring.bicep or event-grid.bicep deployment"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 8. Key Vault is accessible by Function App
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking Key Vault..."
     $kvs = Get-AzKeyVault -ResourceGroupName $ResourceGroup -ErrorAction SilentlyContinue
     if ($kvs.Count -gt 0) {
@@ -248,9 +248,9 @@ try {
             -Recommendation "Check keyvault.bicep deployment"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 9. Storage account has required containers
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking Storage Account..."
     $storageAccounts = Get-AzStorageAccount -ResourceGroupName $ResourceGroup -ErrorAction SilentlyContinue
     if ($storageAccounts.Count -gt 0) {
@@ -280,9 +280,9 @@ try {
             -Recommendation "Check storage.bicep deployment"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 10. AI Search service is running
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking AI Search..."
     $searchServices = Get-AzResource -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.Search/searchServices' -ErrorAction SilentlyContinue
     if ($searchServices.Count -gt 0) {
@@ -293,9 +293,9 @@ try {
             -Recommendation "Check search.bicep deployment"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 11. Foundry project exists
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Checking Foundry project..."
     $foundryProjects = Get-AzResource -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.MachineLearningServices/workspaces' -ErrorAction SilentlyContinue
     if ($foundryProjects.Count -gt 0) {
@@ -305,9 +305,9 @@ try {
             -Recommendation "Check foundry.bicep deployment"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 12. Run Command works (test VM accessibility)
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     Write-Verbose "Testing Run Command..."
     if ($vm -and $powerState -eq 'VM running') {
         try {
@@ -334,9 +334,9 @@ try {
         Test-CheckSkipped -Name "Run Command" -Reason "VM is not running"
     }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     # 13. Teams webhook (optional test)
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # =========================================================================
     if ($TestTeams) {
         Write-Verbose "Testing Teams webhook..."
         
@@ -358,7 +358,7 @@ try {
                                         type = "TextBlock"
                                         size = "Large"
                                         weight = "Bolder"
-                                        text = "🔍 Deployment Validation Test"
+                                        text = "[CHECK] Deployment Validation Test"
                                     }
                                     @{
                                         type = "TextBlock"
@@ -370,7 +370,7 @@ try {
                                         facts = @(
                                             @{ title = "Resource Group"; value = $ResourceGroup }
                                             @{ title = "Timestamp"; value = (Get-Date -Format 'o') }
-                                            @{ title = "Status"; value = "✅ Validation in progress" }
+                                            @{ title = "Status"; value = "[PASS] Validation in progress" }
                                         )
                                     }
                                 )
@@ -396,29 +396,29 @@ try {
 
 } catch {
     Write-Host ""
-    Write-Host "❌ Validation failed with error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "[FAIL] Validation failed with error: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host ""
     exit 1
 }
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# =========================================================================
 # Print Summary
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# =========================================================================
 Write-Host ""
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+Write-Host "===============================================" -ForegroundColor Cyan
 
 if ($failedCount -eq 0) {
-    Write-Host "RESULT: $passedCount/$passedCount checks passed ✅" -ForegroundColor Green
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+    Write-Host "RESULT: $passedCount/$passedCount checks passed [PASS]" -ForegroundColor Green
+    Write-Host "===============================================" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "✅ Deployment is ready for demo!" -ForegroundColor Green
+    Write-Host "[PASS] Deployment is ready for demo!" -ForegroundColor Green
     Write-Host ""
     exit 0
 } else {
-    Write-Host "RESULT: $passedCount checks passed, $failedCount failed ❌" -ForegroundColor Red
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+    Write-Host "RESULT: $passedCount checks passed, $failedCount failed [FAIL]" -ForegroundColor Red
+    Write-Host "===============================================" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "❌ Fix the failed checks above before proceeding." -ForegroundColor Red
+    Write-Host "[FAIL] Fix the failed checks above before proceeding." -ForegroundColor Red
     Write-Host ""
     exit 1
 }
