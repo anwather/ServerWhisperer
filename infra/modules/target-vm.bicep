@@ -14,9 +14,6 @@ param adminPassword string
 @description('Subnet ID for the VM NIC.')
 param subnetId string
 
-@description('URI to configure-winrm.ps1 script in a blob container.')
-param configureWinrmScriptUri string
-
 @description('Tags applied to resources.')
 param tags object
 
@@ -111,12 +108,7 @@ resource winrmExtension 'Microsoft.Compute/virtualMachines/extensions@2024-07-01
     typeHandlerVersion: '1.10'
     autoUpgradeMinorVersion: true
     settings: {
-      commandToExecute: 'powershell -ExecutionPolicy Bypass -File configure-winrm.ps1'
-    }
-    protectedSettings: {
-      fileUris: [
-        configureWinrmScriptUri
-      ]
+      commandToExecute: 'powershell -ExecutionPolicy Bypass -Command "$cert = New-SelfSignedCertificate -DnsName $env:COMPUTERNAME -CertStoreLocation Cert:\\LocalMachine\\My; winrm create winrm/config/Listener?Address=*+Transport=HTTPS \'@{Hostname=\\"$env:COMPUTERNAME\\"; CertificateThumbprint=\\"$($cert.Thumbprint)\\"}\'; Set-Item WSMan:\\localhost\\Service\\Auth\\Basic -Value $true; New-NetFirewallRule -DisplayName \'WinRM HTTPS\' -Direction Inbound -Protocol TCP -LocalPort 5986 -Action Allow"'
     }
   }
   dependsOn: [

@@ -1,11 +1,10 @@
 using 'main.bicep'
 
-param location = 'eastus'
+param location = 'australiaeast'
 param resourcePrefix = 'sw'
 param vmAdminUsername = 'azureuser'
 param vmAdminPassword = 'ReplaceWithSecurePassword123!'
-param deployerPublicIp = '0.0.0.0/32'
-param teamsWebhookUrl = 'https://outlook.office.com/webhook/your-webhook'
+param deployerPublicIp = '167.220.242.221/32'
+param teamsWebhookUrl = 'https://placeholder.webhook.office.com/not-configured-yet'
 param foundryAgentId = 'TODO-AGENT-ID'
-param configureWinrmScriptUri = 'https://<storage-account>.blob.core.windows.net/function-deploy/configure-winrm.ps1'
 param enableEventGrid = false

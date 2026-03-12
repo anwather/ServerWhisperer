@@ -13,7 +13,7 @@ param tags object
 
 var keyVaultName = toLower('${resourcePrefix}-kv-${uniqueString(resourceGroup().id)}')
 
-resource keyVault 'Microsoft.KeyVault/vaults@2024-01-01' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName
   location: location
   tags: tags
@@ -28,7 +28,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2024-01-01' = {
   }
 }
 
-resource teamsSecret 'Microsoft.KeyVault/vaults/secrets@2024-01-01' = {
+resource teamsSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: '${keyVault.name}/TeamsWebhookUrl'
   properties: {
     value: teamsWebhookUrl

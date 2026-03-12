@@ -21,9 +21,6 @@ param teamsWebhookUrl string
 @description('Foundry agent ID (placeholder until created post-deploy).')
 param foundryAgentId string = 'TODO-AGENT-ID'
 
-@description('URI to configure-winrm.ps1 script in a blob container.')
-param configureWinrmScriptUri string
-
 @description('Enable Event Grid system topic and subscription.')
 param enableEventGrid bool = false
 
@@ -51,10 +48,6 @@ module keyVault 'modules/keyvault.bicep' = {
   }
 }
 
-resource keyVaultExisting 'Microsoft.KeyVault/vaults@2024-01-01' existing = {
-  name: keyVault.outputs.keyVaultName
-}
-
 module networking 'modules/networking.bicep' = {
   name: 'networking'
   params: {
@@ -73,7 +66,6 @@ module targetVm 'modules/target-vm.bicep' = {
     adminUsername: vmAdminUsername
     adminPassword: vmAdminPassword
     subnetId: networking.outputs.vmSubnetId
-    configureWinrmScriptUri: configureWinrmScriptUri
     tags: tags
   }
 }
@@ -103,7 +95,8 @@ module functionApp 'modules/function-app.bicep' = {
   params: {
     location: location
     resourcePrefix: resourcePrefix
-    storageConnectionString: storage.outputs.storageConnectionString
+    storageAccountName: storage.outputs.storageAccountName
+    storageAccountId: storage.outputs.storageAccountId
     foundryEndpoint: foundry.outputs.foundryEndpoint
     foundryAgentId: foundryAgentId
     teamsWebhookSecretUri: keyVault.outputs.teamsWebhookSecretUri
@@ -134,7 +127,7 @@ module eventGrid 'modules/event-grid.bicep' = if (enableEventGrid) {
 }
 
 resource vmContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, functionApp.outputs.functionPrincipalId, 'vm-contributor')
+  name: guid(resourceGroup().id, resourcePrefix, 'vm-contributor')
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '9980e02c-c2be-4d73-94e8-173b1dc7cf3c')
@@ -144,7 +137,7 @@ resource vmContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' 
 }
 
 resource readerRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, functionApp.outputs.functionPrincipalId, 'reader')
+  name: guid(resourceGroup().id, resourcePrefix, 'reader')
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
@@ -154,7 +147,7 @@ resource readerRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 resource monitoringReaderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, functionApp.outputs.functionPrincipalId, 'monitoring-reader')
+  name: guid(resourceGroup().id, resourcePrefix, 'monitoring-reader')
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '43d0d8ad-25c7-4714-9337-8ba259a9fe05')
@@ -164,8 +157,7 @@ resource monitoringReaderRole 'Microsoft.Authorization/roleAssignments@2022-04-0
 }
 
 resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(keyVault.outputs.keyVaultId, functionApp.outputs.functionPrincipalId, 'kv-secrets-user')
-  scope: keyVaultExisting
+  name: guid(resourceGroup().id, resourcePrefix, 'kv-secrets-user')
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
     principalId: functionApp.outputs.functionPrincipalId

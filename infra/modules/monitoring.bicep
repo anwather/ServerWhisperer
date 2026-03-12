@@ -79,7 +79,7 @@ resource diskAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
       allOf: [
         {
           name: 'OSDiskUsed'
-          metricName: 'OS Disk Used Percentage'
+          metricName: 'OS Disk Bandwidth Consumed Percentage'
           metricNamespace: 'Microsoft.Compute/virtualMachines'
           operator: 'GreaterThan'
           threshold: 85

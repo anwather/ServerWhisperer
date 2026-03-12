@@ -62,14 +62,15 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
 
 resource openAiDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   name: '${openAiAccount.name}/gpt-4o-mini'
+  sku: {
+    name: 'GlobalStandard'
+    capacity: 10
+  }
   properties: {
     model: {
       format: 'OpenAI'
       name: 'gpt-4o-mini'
       version: '2024-07-18'
-    }
-    scaleSettings: {
-      scaleType: 'Standard'
     }
   }
 }

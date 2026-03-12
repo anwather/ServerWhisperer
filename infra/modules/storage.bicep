@@ -20,6 +20,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   properties: {
     allowBlobPublicAccess: false
     minimumTlsVersion: 'TLS1_2'
+    allowSharedKeyAccess: true
   }
 }
 
@@ -81,14 +82,8 @@ resource functionDeployContainer 'Microsoft.Storage/storageAccounts/blobServices
   ]
 }
 
-var storageKeys = listKeys(storageAccount.id, storageAccount.apiVersion)
-var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageKeys.keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-
 @description('Storage account name.')
 output storageAccountName string = storageAccount.name
 
 @description('Storage account resource ID.')
 output storageAccountId string = storageAccount.id
-
-@description('Primary storage connection string.')
-output storageConnectionString string = storageConnectionString
