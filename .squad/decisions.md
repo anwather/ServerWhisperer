@@ -687,3 +687,114 @@ Both scripts follow a consistent pattern: structured checks, visual output with 
 6. Report success/failure with total elapsed time
 
 ---
+
+
+# Decision: Migrate to Foundry Project and GitHub Issues
+
+**Date:** 2026-03-16  
+**Agent:** Mulder (Backend Dev / PowerShell Specialist)  
+**Status:** Implemented  
+
+## Context
+
+The alert-to-diagnosis pipeline was using AI Hub + separate OpenAI resource for the Foundry agent, and sending reports to Teams via webhook. Anthony requested two architectural changes:
+
+1. **Foundry architecture:** Migrate from AI Hub + OpenAI to Foundry Project (single `AIServices` account with child project)
+2. **Reporting:** Replace Teams webhook with GitHub issue creation
+
+## Decision
+
+### Change 1: Foundry Project Architecture
+
+**Before:**
+- AI Hub (`Microsoft.MachineLearningServices/workspaces`, kind: 'Hub')
+- AI Project (kind: 'Project', child of Hub)
+- Separate Azure OpenAI resource (`Microsoft.CognitiveServices/accounts`, kind: 'OpenAI')
+- Model deployment on OpenAI resource
+- OpenAI Assistants API (`{openaiEndpoint}/openai/threads`, token: `https://cognitiveservices.azure.com`)
+
+**After:**
+- Foundry account (`Microsoft.CognitiveServices/accounts`, kind: 'AIServices', sku: S0)
+- Foundry project (`Microsoft.CognitiveServices/accounts/projects`)
+- Model deployment as child of account
+- Foundry Agents API (endpoint: `https://{account-name}.services.ai.azure.com/api/projects/{project-name}`)
+- API version: `2025-05-01` (GA)
+- Token resource: `https://ai.azure.com`
+- RBAC: `Azure AI User` role on Foundry project for Function App managed identity
+
+**Rationale:**
+- Foundry project is the Microsoft-recommended path for Agents API (GA as of 2025-05-01)
+- Simpler architecture: single Cognitive Services account instead of Hub + OpenAI resource
+- No dependency on storage account or Key Vault for Foundry (removed those params from foundry.bicep)
+- Better alignment with Microsoft's AI platform roadmap
+
+### Change 2: GitHub Issues for Reporting
+
+**Before:**
+- Teams Adaptive Card via webhook URL stored in Key Vault
+- Parameters: `teamsWebhookUrl` in main.bicep/bicepparam
+- App setting: `TeamsWebhookUrl` with Key Vault reference
+
+**After:**
+- GitHub issue creation via REST API using PAT
+- Parameters: `githubToken`, `githubOwner`, `githubRepo` in main.bicep/bicepparam
+- App settings: `GitHubToken` (Key Vault ref), `GitHubOwner`, `GitHubRepo`
+- Issue title: `[ServerWhisperer] {emoji} {alertRuleName} on {vmName}`
+- Issue body: Markdown with alert details, AI analysis, links to blob report and Azure portal
+- Labels: `serverwhisperer` + severity label (`critical`, `warning`, `info`)
+
+**Rationale:**
+- GitHub issues provide better tracking, searchability, and integration with project workflows
+- Centralized alert history in the project repository
+- Easier automation (close issues when resolved, link to PRs, etc.)
+- Teams notifications can still be added via GitHub webhooks if needed
+- PAT security model better suited for automated tooling
+
+## Implementation Details
+
+### Bicep Changes
+
+- `foundry.bicep`: Complete rewrite for Foundry project (removed Hub/OpenAI, added AIServices account + project)
+- `main.bicep`: Removed `teamsWebhookUrl` param, added `githubToken`, `githubOwner`, `githubRepo`, added `Azure AI User` RBAC assignment
+- `main.bicepparam`: Updated parameters to match
+- `keyvault.bicep`: Replaced Teams secret with GitHub PAT
+- `function-app.bicep`: Updated app settings for GitHub
+
+### PowerShell Changes
+
+- `AnalyzeWithFoundryAgent/run.ps1`: Rewritten for Foundry Agents API (new endpoint format, token resource, API version)
+- `SendReport/run.ps1`: Replaced Teams card logic with GitHub issue creation
+- `create-foundry-agent.ps1`: Updated for Foundry project endpoint and token resource, added `-FoundryAccountName` parameter
+
+### Breaking Changes
+
+- Deployment requires new parameters: `githubToken`, `githubOwner`, `githubRepo` (replace `teamsWebhookUrl`)
+- `create-foundry-agent.ps1` now requires `-FoundryAccountName` parameter (account name, not project name)
+- Existing deployments on `feature/azure-alert-automation` branch need redeployment with new parameters
+
+## Next Steps
+
+1. Update `main.bicepparam` with actual GitHub PAT (replace placeholder)
+2. Redeploy infrastructure: `az deployment group create --resource-group rg-serverwhisperer-demo --template-file infra/main.bicep --parameters infra/main.bicepparam`
+3. Run `create-foundry-agent.ps1` with `-FoundryAccountName` (get from deployment outputs)
+4. Update Function App setting `FoundryAgentId` with new agent ID
+5. Test alert pipeline end-to-end (should create GitHub issue instead of Teams message)
+6. Verify RBAC: Function App identity should have `Azure AI User` role on Foundry project
+
+## Risks & Mitigations
+
+**Risk:** GitHub PAT stored in Key Vault could be compromised  
+**Mitigation:** Use fine-grained PAT with minimal scope (issues: write only), rotate regularly
+
+**Risk:** Foundry API changes in future versions  
+**Mitigation:** API version pinned to `2025-05-01` (GA), monitor for deprecation notices
+
+**Risk:** GitHub rate limiting on issue creation  
+**Mitigation:** Alert pipeline is low-volume (one issue per alert), well within GitHub API limits
+
+## References
+
+- [Azure AI Foundry documentation](https://learn.microsoft.com/azure/ai-services/foundry/)
+- [Foundry Agents API reference](https://learn.microsoft.com/azure/ai-services/foundry/agents-api)
+- [GitHub REST API - Issues](https://docs.github.com/rest/issues/issues)
+
