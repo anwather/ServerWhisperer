@@ -538,3 +538,152 @@ The agent abstraction is the right level. We'd end up building half of what Foun
 - All meaningful changes require team consensus
 - Document architectural decisions here
 - Keep history focused on work, decisions focused on direction
+
+### 17. Decision: Phase 1 Demo Bicep IaC Layout
+
+**Date:** 2026-03-12  
+**Owner:** Mulder  
+**Status:** Implemented
+
+## Context
+Phase 1 demo requires a single deployment that provisions VM diagnostics, monitoring, Foundry AI resources, and supporting services. Infrastructure must remain modular, repeatable, and tagged consistently for demo operations.
+
+## Decision
+Adopt a modular Bicep structure under infra/ with a main.bicep orchestrator and modules for networking, target VM, monitoring, Function App, Foundry + OpenAI deployment, storage, Key Vault, search, and optional Event Grid. All resources are tagged with project=serverwhisperer and nvironment=demo. Function App managed identity receives RG-level Reader, Monitoring Reader, and Virtual Machine Contributor plus Key Vault Secrets User at vault scope.
+
+## Rationale
+- Modularized Bicep keeps each concern independently testable and reusable.
+- Central orchestration ensures one-shot deployment for demo setup.
+- Managed identity + RBAC avoids storing credentials.
+- Tags enable easy filtering and cleanup in demo subscriptions.
+
+## Consequences
+- Requires uploading configure-winrm.ps1 to a blob container and passing the URI to the VM extension.
+- Foundry deployment relies on OpenAI account deployment for GPT-4o-mini until Foundry model deployment is Bicep-native.
+
+---
+
+### 18. Decision: Package Diagnostics Script with Function App Deployment
+
+## Context
+The Durable Function's ExecuteDiagnostics activity reads Get-AllDiagnostics.ps1 at runtime to invoke Azure Run Command. The function app code is deployed as a ZIP package, and the repository keeps the diagnostic script under infra/scripts/.
+
+## Decision
+The deployment script (infra/scripts/deploy-function-code.ps1) stages a temporary copy of the Function App code and adds Get-AllDiagnostics.ps1 at the Function App root before zipping. This guarantees the script is present in Azure and keeps the source-of-truth script in infra/scripts/.
+
+## Consequences
+- ExecuteDiagnostics can reliably load ..\Get-AllDiagnostics.ps1 in production.
+- The repo avoids duplicating the script in multiple committed locations.
+- Deployments are deterministic; the staging step is required.
+
+---
+
+### 19. Decision: Deployment Guide Structure for Alert Automation Demo
+
+**Author:** Doggett (DevRel/Technical Writer)  
+**Date:** 2026-03-12  
+**Status:** Implemented  
+**Request:** Anthony Watherston (deployment documentation for ServerWhisperer Alert Automation)
+
+---
+
+## Decision
+
+Created infra/README.md as the definitive deployment guide for the ServerWhisperer Alert Automation demo infrastructure. The guide prioritizes **deployability** and **post-deployment verification** over architectural explanation (architecture is documented in Scully's plan).
+
+### Structure Rationale
+
+**Why this order?**
+
+1. **Overview + Diagram** (top) — Readers need to understand the flow before they encounter commands
+2. **Prerequisites** (before execution) — Catch blockers early (missing tools, permissions, services)
+3. **Resource Providers** (before deployment) — Better to register namespaces in advance than fail mid-deployment
+4. **Quick Start** (numbered, sequential) — Exactly mirrors the order: create RG → prepare params → deploy Bicep → deploy functions → create agent
+5. **Post-Deployment Configuration** (verification, not troubleshooting) — New deployment is the happy path; verify before investigating issues
+6. **Running the Demo** (triggers + expected timeline) — Only after infrastructure is verified
+7. **Cost & Cleanup** (operational concerns) — Addressed after the demo runs successfully
+
+**Why post-deployment verification is critical:**
+
+- Deployment output doesn't always confirm success (Bicep ✅ doesn't mean Foundry agent was created)
+- Users need explicit "check this exists" steps or they'll spend hours debugging non-existent resources
+- Verification commands are testable entry points for troubleshooting (if verification fails, skip to troubleshooting)
+
+### Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| All commands are copy-pasteable | Reduces transcription errors, increases successful deployments |
+| Dynamic resource ID lookup ($(az ...)) | Infrastructure names might vary; avoid hardcoding |
+| Parameter file guidance instead of hard-coded values | Teams webhook and VM password are user-provided; show where they go |
+| Realistic timelines in comments | Users understand why they're waiting (10-15 min for Bicep, ~5-7 min for alert window) |
+| Three troubleshooting "trees" (symptoms → diagnosis → fix) | Not all failures have the same root cause; users need branching decision logic |
+| Cost section emphasizes deallocate-when-idle | Pivotal for demo economics; otherwise looks expensive |
+| Cleanup explicitly warns of permanent deletion | Prevents accidental data loss after demo |
+
+### Audience Assumptions
+
+- User is an **Azure ops engineer or SRE** — familiar with Azure Portal, CLI, subscriptions, RBAC
+- User **is NOT** a Foundry/AI expert — explain AI Foundry as "managed agent service" without deep theory
+- User **has never deployed this specific demo** — walk them through one working example
+- User **reads from top to bottom** — don't reference "see step 3" from step 8; keep each section self-contained
+
+---
+
+### 20. Decision: Validation Script Architecture for Demo Infrastructure
+
+**Author:** Skinner (Tester/QA)  
+**Date:** 2026-03-12  
+**Status:** Implemented  
+**Related:** Phase 1 Demo Infrastructure (Scully's architecture plan v2)
+
+---
+
+## Summary
+
+Created two validation scripts for the Alert-to-Diagnosis pipeline demo infrastructure:
+
+1. **Validate-Deployment.ps1** — Post-deployment smoke test (13 checks, ~2-3 min runtime)
+2. **Test-EndToEnd.ps1** — Full integration test from alert to report blob (~10-15 min runtime)
+
+Both scripts follow a consistent pattern: structured checks, visual output with emoji indicators, actionable error messages with remediation steps, and proper exit codes for CI/CD integration.
+
+### Validation Strategy
+
+| Script | Purpose | When to Run | Duration |
+|--------|---------|-------------|----------|
+| **Validate-Deployment** | Smoke test — verify all resources are deployed and configured correctly | After every z deployment group create, before demo | 2-3 min |
+| **Test-EndToEnd** | Integration test — trigger alert, verify full pipeline execution, confirm report created | On demand or in CI pipeline | 10-15 min |
+
+### Design Patterns
+
+1. **Structured check results** — Consistent output format, immediate feedback with remediation
+2. **Graceful resource discovery** — No hardcoded names, discovers by type, handles naming variations
+3. **Time-boxed polling with elapsed time** — Users see progress, know script hasn't hung, understand remaining time
+
+### Check Coverage
+
+**Validate-Deployment.ps1 (13 checks):**
+1. Resource Group exists (resource count)
+2. VM is running (power state)
+3. VM has system-assigned managed identity enabled
+4. Function App is running
+5. Function App app settings (FOUNDRY_ENDPOINT, FOUNDRY_AGENT_ID not placeholders)
+6. Alert rules active (3/3 enabled)
+7. Action Group exists with receivers
+8. Key Vault accessible by Function App MI
+9. Storage account has 'reports' and 'diagnostics' containers
+10. AI Search service running
+11. Foundry project exists
+12. Run Command works (Invoke-AzVMRunCommand returns hostname)
+13. Teams webhook test (optional with -TestTeams switch)
+
+**Test-EndToEnd.ps1 flow:**
+1. Run Validate-Deployment.ps1 (bail if fails)
+2. Trigger CPU stress via Run Command (7 minutes by default)
+3. Poll Azure Monitor Activity Log for alert (check every 30s)
+4. Wait for orchestration processing (120s window — assumes execution without direct API access)
+5. Check for report blob in storage (created in last 15 minutes)
+6. Report success/failure with total elapsed time
+
+---

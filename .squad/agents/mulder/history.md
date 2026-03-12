@@ -9,6 +9,16 @@
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
 
+### 2026-03-12 - Durable Function + Foundry Agent Implementation Notes
+
+**What was built:** Implemented the Azure Durable Functions PowerShell pipeline (AlertIngress → ClassifyTarget → ExecuteDiagnostics → AnalyzeWithFoundryAgent → SendReport), plus post-deploy scripts for Foundry agent creation and function code deployment.
+
+**Key learnings:**
+- Durable orchestration must remain deterministic; all external calls are isolated to activity functions with retry policies.
+- Run Command output is capped (~4KB). The VM-side Get-AllDiagnostics script trims arrays and message sizes to stay under the limit.
+- Foundry agent integration requires a tool-call loop (requires_action → submit_tool_outputs) with short polling intervals (2s, 60s max).
+- Deployment packaging must include the bundled diagnostics script at Function App root so ExecuteDiagnostics can read it reliably.
+
 ### 2026-03-09 - Initial Skill Library Created
 
 **Created comprehensive PowerShell diagnostic skills** under `skills/` directory (product files, not team .squad/skills):
@@ -44,6 +54,30 @@
 - Include both quick checks and deep diagnostic variants
 
 ---
+
+### 2026-03-12 - Phase 1 Demo Bicep IaC
+
+**What:** Created the Phase 1 demo infrastructure under `infra/` with a modular Bicep layout (main orchestrator + modules for networking, VM, monitoring, function app, Foundry, storage, key vault, search, and event grid) plus WinRM/load simulation scripts.
+
+**API versions used (latest stable where available):**
+- Compute: `Microsoft.Compute/virtualMachines@2024-07-01`
+- Network: `Microsoft.Network/*@2024-05-01`
+- Web/Functions: `Microsoft.Web/*@2024-04-01`
+- Storage/Key Vault: `Microsoft.Storage@2024-01-01`, `Microsoft.KeyVault@2024-01-01`
+- Foundry: `Microsoft.MachineLearningServices/workspaces@2024-10-01`
+- OpenAI: `Microsoft.CognitiveServices/accounts@2024-10-01`
+
+**RBAC assignments for Function App identity:**
+- **Virtual Machine Contributor** at resource group scope
+- **Reader** at resource group scope
+- **Monitoring Reader** at resource group scope
+- **Key Vault Secrets User** at Key Vault scope
+
+**Key structure decisions:**
+- Centralized tags (`project: serverwhisperer`, `environment: demo`) applied to all resources.
+- CustomScriptExtension runs `configure-winrm.ps1` via blob URI for HTTPS WinRM setup.
+- Monitoring alerts use a single action group webhook to `AlertIngress`.
+
 
 ### Azure VM Connectivity Skill Created
 

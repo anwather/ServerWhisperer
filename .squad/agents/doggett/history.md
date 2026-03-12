@@ -148,6 +148,84 @@ Site is live and deployed. All 7 documentation pages are publicly accessible via
 
 ---
 
+### Deployment Guide & Infrastructure README (2026-03-12T1830)
+
+**Requested by:** Anthony Watherston  
+**Priority:** Complete deployment documentation for ServerWhisperer Alert Automation demo  
+**Outcome:** SUCCESS
+
+**File created:** `infra/README.md` — comprehensive deployment guide covering the full alert-to-diagnosis pipeline
+
+**Structure & Patterns:**
+
+1. **Overview** — One paragraph explaining what the demo does (alert → diagnosis → Teams)
+2. **Architecture Diagram** — ASCII art flow from alert source through Durable Functions to Teams reporting
+3. **Prerequisites** — Four critical sections:
+   - Azure permissions (Owner/Contributor + UAA)
+   - Local tools (Azure CLI, PowerShell 7)
+   - Teams webhook setup with link to docs
+   - AI Foundry registration check with CLI commands
+4. **Resource Providers** — All 8 required namespaces with `az provider register` commands (pre-registration best practice)
+5. **Quick Start** — 6 numbered steps with copy-pasteable PowerShell commands:
+   - Clone repo
+   - Create resource group
+   - Prepare parameters (webhook, password)
+   - Deploy Bicep with all arguments
+   - Deploy Function App code
+   - Create Foundry agent
+6. **Post-Deployment Configuration** — Critical verification section (Anthony specifically requested this):
+   - Verify Teams webhook stored in Key Vault
+   - Verify Foundry agent exists in AI Studio with tools and KB
+   - Verify Function App has all 6 functions deployed
+   - Check Alert Rules are enabled
+   - NSG rules for optional RDP/WinRM access with public IP lookup
+   - VM admin credentials storage location
+7. **Running the Demo** — Step-by-step with timeline and three execution modes (CPU stress, disk pressure, check results)
+8. **Cost Estimate** — Demo ($15-25 idle, $80-90 running) vs production (~$50/month), with deallocate recommendation
+9. **Troubleshooting** — 5 common scenarios with diagnosis steps and remediation:
+   - "Alert didn't fire" → check metric alert enabled, evaluation window, stress script
+   - "Function didn't trigger" → check Event Grid subscription, Function logs, AppInsights queries
+   - "Foundry agent error" → check agent exists, RBAC, Foundry endpoint settings
+   - "Teams card not received" → verify webhook URL, SendReport logs, correct Teams channel
+   - "Run Command timeout" → check VM running, heavy load, extension status
+10. **Cleanup** — Single `az group delete` command with warning about permanent deletion
+11. **Next Steps** — Suggestions for post-demo work and production hardening
+
+**Documentation Patterns Applied:**
+
+- **Admonitions:** ⚠️ Important, 💡 Tip, 📝 Note used consistently for callouts
+- **Copy-pasteable code blocks:** All PowerShell and Azure CLI commands are production-ready
+- **Progressive disclosure:** Prerequisites → quick start → verification → troubleshooting (easy to moderate to complex)
+- **Verification steps:** After each deployment phase, users can verify success before proceeding
+- **Realistic timelines:** Noted wait times (10-15 min Bicep, 5-7 min alert firing, ~9 min total pipeline)
+- **Troubleshooting diagnosis flow:** Symptoms → check commands → remediation → escalation
+- **Reference links:** All external docs (Teams webhooks, Azure CLI, PowerShell) link to official Microsoft docs
+- **Cost awareness:** Emphasized deallocate-when-idle pattern for demo cost optimization
+
+**Key Features for Deployability:**
+
+1. **No manual Azure Portal steps:** Everything done via CLI where possible
+2. **Declarative resource references:** Uses `$(az ... --query ...)` to fetch resource IDs dynamically
+3. **Parameter file guidance:** Shows how to pass sensitive values (webhook, password) safely
+4. **Error recovery:** For every "this might fail" scenario, provides specific diagnostic commands
+5. **Multi-path execution:** Three ways to trigger demo (CPU, disk, manual), all documented
+
+**Tone & Audience:**
+
+- **Audience:** Azure ops engineers, SRE teams, demo stakeholders (technical but not Foundry-specialist)
+- **Tone:** Direct, practical, action-oriented. Assumes user can run CLI but doesn't know the demo internals
+- **Safety:** Emphasized immutable deletion, permanent data loss warnings, credential security
+
+**Architecture Documentation Integration:**
+
+- README assumes reader has read the architecture plan (from .squad/agents/scully/)
+- Bicep structure mirrors Scully's 3.3 Orchestration design (AlertIngress, InvestigationOrchestrator, etc.)
+- Foundry agent system prompt and tools match section 3.5.2-3.5.3 specifications
+- Cost table derived from Scully's section 8 estimates
+- Data flow sequence matches Scully's section 5 (updated 10-step sequence)
+
+---
+
 ### Plugin Install as Primary Method Documentation Update (2026-03-10T1645)
 
 **Requested by:** Anthony Watherston  
