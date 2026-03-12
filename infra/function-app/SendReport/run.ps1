@@ -1,6 +1,7 @@
 param($InputData)
 
 $ErrorActionPreference = 'Stop'
+Ensure-AzConnected
 
 $alert = $InputData.Alert
 $analysis = $InputData.Analysis
@@ -36,7 +37,10 @@ $reportJson = $report | ConvertTo-Json -Depth 8
 
 try {
     $context = New-AzStorageContext -StorageAccountName $storageAccount -UseConnectedAccount -ErrorAction Stop
-    Set-AzStorageBlobContent -Context $context -Container $containerName -Blob $blobName -StringContent $reportJson -ContentType 'application/json' -Force | Out-Null
+    $tempFile = Join-Path $env:TEMP $blobName
+    $reportJson | Set-Content -Path $tempFile -Encoding UTF8 -Force
+    Set-AzStorageBlobContent -Context $context -Container $containerName -Blob $blobName -File $tempFile -Properties @{ ContentType = 'application/json' } -Force | Out-Null
+    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
 } catch {
     throw "Failed to write report to storage. $($_.Exception.Message)"
 }
@@ -48,17 +52,21 @@ function Get-TeamsWebhookUrl {
         return $env:TEAMS_WEBHOOK_URL
     }
 
+    if ($env:TeamsWebhookUrl -and $env:TeamsWebhookUrl -notmatch '@Microsoft\.KeyVault') {
+        return $env:TeamsWebhookUrl
+    }
+
     if ($env:KEYVAULT_NAME) {
         $secretName = if ($env:TEAMS_WEBHOOK_SECRET_NAME) { $env:TEAMS_WEBHOOK_SECRET_NAME } else { 'teams-webhook-url' }
         try {
             $secret = Get-AzKeyVaultSecret -VaultName $env:KEYVAULT_NAME -Name $secretName -ErrorAction Stop
             return [System.Net.NetworkCredential]::new('', $secret.SecretValue).Password
         } catch {
-            throw "Failed to retrieve Teams webhook from Key Vault. $($_.Exception.Message)"
+            return $null
         }
     }
 
-    throw 'Teams webhook URL not configured. Set TEAMS_WEBHOOK_URL or Key Vault settings.'
+    return $null
 }
 
 $analysisText = if ($analysis -is [string]) {
@@ -134,8 +142,12 @@ $teamsPayload = @{
 
 try {
     $webhookUrl = Get-TeamsWebhookUrl
-    Invoke-RestMethod -Method Post -Uri $webhookUrl -Body ($teamsPayload | ConvertTo-Json -Depth 8) -ContentType 'application/json' -ErrorAction Stop | Out-Null
-    $teamsStatus = 'Sent'
+    if ($webhookUrl) {
+        Invoke-RestMethod -Method Post -Uri $webhookUrl -Body ($teamsPayload | ConvertTo-Json -Depth 8) -ContentType 'application/json' -ErrorAction Stop | Out-Null
+        $teamsStatus = 'Sent'
+    } else {
+        $teamsStatus = 'Skipped: No webhook URL configured'
+    }
 } catch {
     $teamsStatus = "Failed: $($_.Exception.Message)"
 }

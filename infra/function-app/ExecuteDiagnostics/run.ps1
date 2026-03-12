@@ -1,6 +1,7 @@
 param($InputData)
 
 $ErrorActionPreference = 'Stop'
+Ensure-AzConnected
 
 $target = $InputData.Target
 if (-not $target.VMName -or -not $target.ResourceGroupName) {
@@ -30,7 +31,6 @@ try {
         -CommandId 'RunPowerShellScript' `
         -ScriptString $scriptContent `
         -Parameter $parameters `
-        -TimeoutInSeconds 90 `
         -ErrorAction Stop
 } catch {
     throw "Invoke-AzVMRunCommand failed for $($target.VMName). $($_.Exception.Message)"

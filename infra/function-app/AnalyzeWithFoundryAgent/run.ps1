@@ -1,17 +1,21 @@
 param($InputData)
 
 $ErrorActionPreference = 'Stop'
+Ensure-AzConnected
 
-$foundryEndpoint = $env:FOUNDRY_ENDPOINT
-$agentId = $env:FOUNDRY_AGENT_ID
+$foundryEndpoint = $env:FoundryEndpoint
+$agentId = $env:FoundryAgentId
 
 if (-not $foundryEndpoint) {
-    throw 'FOUNDRY_ENDPOINT app setting is required.'
+    throw 'FoundryEndpoint app setting is required.'
 }
 
 if (-not $agentId) {
-    throw 'FOUNDRY_AGENT_ID app setting is required.'
+    throw 'FoundryAgentId app setting is required.'
 }
+
+# Remove trailing slash from endpoint if present
+$foundryEndpoint = $foundryEndpoint.TrimEnd('/')
 
 if ($InputData.Target.SubscriptionId) {
     try {
@@ -21,24 +25,28 @@ if ($InputData.Target.SubscriptionId) {
     }
 }
 
-function Get-FoundryToken {
+$apiVersion = "2024-05-01-preview"
+
+function Get-CogServicesToken {
     try {
-        return (Get-AzAccessToken -ResourceUrl 'https://management.azure.com' -ErrorAction Stop).Token
+        return (Get-AzAccessToken -ResourceUrl 'https://cognitiveservices.azure.com' -ErrorAction Stop).Token
     } catch {
-        throw "Failed to acquire managed identity token. $($_.Exception.Message)"
+        throw "Failed to acquire Cognitive Services token. $($_.Exception.Message)"
     }
 }
 
-function Invoke-FoundryRequest {
+function Invoke-AssistantRequest {
     param(
         [string]$Method,
-        [string]$Uri,
+        [string]$Path,
         [object]$Body
     )
 
-    $token = Get-FoundryToken
+    $token = Get-CogServicesToken
+    $separator = if ($Path -match '\?') { '&' } else { '?' }
+    $uri = "${foundryEndpoint}/openai${Path}${separator}api-version=${apiVersion}"
     $headers = @{
-        Authorization = "Bearer $token"
+        Authorization  = "Bearer $token"
         'Content-Type' = 'application/json'
     }
 
@@ -48,13 +56,13 @@ function Invoke-FoundryRequest {
     }
 
     try {
-        return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $headers -Body $payload -ErrorAction Stop
+        return Invoke-RestMethod -Method $Method -Uri $uri -Headers $headers -Body $payload -ErrorAction Stop
     } catch {
-        throw "Foundry API call failed: $Method $Uri. $($_.Exception.Message)"
+        throw "Assistant API call failed: $Method $uri. $($_.Exception.Message)"
     }
 }
 
-$thread = Invoke-FoundryRequest -Method 'POST' -Uri "$foundryEndpoint/agents/v1.0/threads" -Body @{}
+$thread = Invoke-AssistantRequest -Method 'POST' -Path "/threads" -Body @{}
 $threadId = $thread.id
 
 $diagnosticJson = $InputData.Diagnostics.Output | ConvertTo-Json -Depth 6 -Compress
@@ -78,12 +86,12 @@ Analyze these results. Determine root cause and provide remediation steps.
 Use your tools if you need additional Azure context (Resource Graph, Activity Log, VM power state).
 "@
 
-Invoke-FoundryRequest -Method 'POST' -Uri "$foundryEndpoint/agents/v1.0/threads/$threadId/messages" -Body @{
+Invoke-AssistantRequest -Method 'POST' -Path "/threads/$threadId/messages" -Body @{
     role    = 'user'
     content = $messageContent
 } | Out-Null
 
-$run = Invoke-FoundryRequest -Method 'POST' -Uri "$foundryEndpoint/agents/v1.0/threads/$threadId/runs" -Body @{
+$run = Invoke-AssistantRequest -Method 'POST' -Path "/threads/$threadId/runs" -Body @{
     assistant_id = $agentId
 }
 $runId = $run.id
@@ -95,7 +103,7 @@ $runStatus = $null
 while ($attempt -lt $maxAttempts) {
     Start-Sleep -Seconds 2
     $attempt++
-    $runStatus = Invoke-FoundryRequest -Method 'GET' -Uri "$foundryEndpoint/agents/v1.0/threads/$threadId/runs/$runId" -Body $null
+    $runStatus = Invoke-AssistantRequest -Method 'GET' -Path "/threads/$threadId/runs/$runId" -Body $null
 
     if ($runStatus.status -eq 'requires_action') {
         $toolCalls = $runStatus.required_action.submit_tool_outputs.tool_calls
@@ -129,7 +137,7 @@ while ($attempt -lt $maxAttempts) {
             }
         }
 
-        Invoke-FoundryRequest -Method 'POST' -Uri "$foundryEndpoint/agents/v1.0/threads/$threadId/runs/$runId/submit_tool_outputs" -Body @{
+        Invoke-AssistantRequest -Method 'POST' -Path "/threads/$threadId/runs/$runId/submit_tool_outputs" -Body @{
             tool_outputs = $toolOutputs
         } | Out-Null
         continue
@@ -151,7 +159,7 @@ if (-not $runStatus -or $runStatus.status -ne 'completed') {
     }
 }
 
-$messages = Invoke-FoundryRequest -Method 'GET' -Uri "$foundryEndpoint/agents/v1.0/threads/$threadId/messages?order=desc&limit=1" -Body $null
+$messages = Invoke-AssistantRequest -Method 'GET' -Path "/threads/$threadId/messages?order=desc&limit=1" -Body $null
 $agentResponse = $messages.data[0].content[0].text.value
 
 @{

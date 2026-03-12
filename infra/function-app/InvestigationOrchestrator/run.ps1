@@ -3,8 +3,6 @@ param($Context)
 $alert = $Context.Input
 
 $retryOptions = New-DurableRetryOptions -FirstRetryInterval (New-TimeSpan -Seconds 5) -MaxNumberOfAttempts 3
-$retryOptions.BackoffCoefficient = 2
-$retryOptions.MaxRetryInterval = New-TimeSpan -Seconds 60
 
 $classification = Invoke-DurableActivity -FunctionName 'ClassifyTarget' -Input $alert -RetryOptions $retryOptions
 

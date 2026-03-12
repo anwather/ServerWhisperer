@@ -1,9 +1,9 @@
 param($InputData)
 
 $ErrorActionPreference = 'Stop'
+Ensure-AzConnected
 
-Write-Host "ClassifyTarget received input type: $($InputData.GetType().FullName)"
-Write-Host "ClassifyTarget input keys: $(($InputData | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) -join ', ')"
+Write-Host "ClassifyTarget received input keys: $(($InputData | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) -join ', ')"
 Write-Host "ClassifyTarget targetResourceId: '$($InputData.targetResourceId)'"
 
 if (-not $InputData.targetResourceId) {

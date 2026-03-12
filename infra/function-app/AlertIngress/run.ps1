@@ -6,7 +6,7 @@ param(
     $starter
 )
 
-$ErrorActionPreference = 'Stop'
+Write-Host "AlertIngress triggered. Method: $($Request.Method)"
 
 try {
     if (-not $Request.Body) {
@@ -18,6 +18,8 @@ try {
     } else {
         $Request.Body
     }
+
+    Write-Host "Parsed alert payload. Schema: $($payload.schemaId)"
 
     $essentials = $payload.data.essentials
     $alertContext = $payload.data.alertContext
@@ -53,12 +55,22 @@ try {
         $alertInput.timestamp = $alertContext.timestamp
     }
 
-    $instanceId = Start-DurableOrchestration -FunctionName 'InvestigationOrchestrator' -Input $alertInput -Client $starter
-    $Response = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $instanceId -Client $starter
+    Write-Host "Starting orchestration for alert: $($alertInput.alertRuleName) on $($alertInput.targetResourceId)"
+    Write-Host "Durable client binding present: $($null -ne $starter)"
+
+    $instanceId = Start-DurableOrchestration -FunctionName 'InvestigationOrchestrator' -Input $alertInput -DurableClient $starter
+    Write-Host "Orchestration started. InstanceId: $instanceId"
+
+    $checkStatusResponse = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $instanceId -DurableClient $starter
+
+    Push-OutputBinding -Name Response -Value $checkStatusResponse
 } catch {
-    $Response = [HttpResponseContext]@{
-        StatusCode = [HttpStatusCode]::BadRequest
-        Body       = @{ error = $_.Exception.Message } | ConvertTo-Json
+    Write-Error "AlertIngress failed: $($_.Exception.Message)"
+    Write-Error $_.ScriptStackTrace
+
+    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+        StatusCode = [HttpStatusCode]::InternalServerError
+        Body       = (@{ error = $_.Exception.Message; stack = $_.ScriptStackTrace } | ConvertTo-Json)
         Headers    = @{ 'Content-Type' = 'application/json' }
-    }
+    })
 }
