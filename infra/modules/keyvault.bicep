@@ -4,9 +4,9 @@ param location string
 @description('Prefix used for resource names.')
 param resourcePrefix string
 
-@description('Teams webhook URL to store as a secret.')
+@description('GitHub Personal Access Token to store as a secret.')
 @secure()
-param teamsWebhookUrl string
+param githubToken string
 
 @description('Tags applied to resources.')
 param tags object
@@ -28,10 +28,10 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   }
 }
 
-resource teamsSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
-  name: '${keyVault.name}/TeamsWebhookUrl'
+resource githubTokenSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: '${keyVault.name}/GitHubToken'
   properties: {
-    value: teamsWebhookUrl
+    value: githubToken
   }
 }
 
@@ -41,5 +41,5 @@ output keyVaultId string = keyVault.id
 @description('Key Vault name.')
 output keyVaultName string = keyVault.name
 
-@description('Teams webhook secret URI.')
-output teamsWebhookSecretUri string = teamsSecret.properties.secretUriWithVersion
+@description('GitHub token secret URI.')
+output githubTokenSecretUri string = githubTokenSecret.properties.secretUriWithVersion

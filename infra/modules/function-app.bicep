@@ -16,8 +16,14 @@ param foundryEndpoint string
 @description('Foundry agent ID placeholder.')
 param foundryAgentId string
 
-@description('Key Vault secret URI for the Teams webhook.')
-param teamsWebhookSecretUri string
+@description('Key Vault secret URI for the GitHub token.')
+param githubTokenSecretUri string
+
+@description('GitHub repository owner.')
+param githubOwner string
+
+@description('GitHub repository name.')
+param githubRepo string
 
 @description('Tags applied to resources.')
 param tags object
@@ -81,8 +87,16 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           value: foundryAgentId
         }
         {
-          name: 'TeamsWebhookUrl'
-          value: '@Microsoft.KeyVault(SecretUri=${teamsWebhookSecretUri})'
+          name: 'GitHubToken'
+          value: '@Microsoft.KeyVault(SecretUri=${githubTokenSecretUri})'
+        }
+        {
+          name: 'GitHubOwner'
+          value: githubOwner
+        }
+        {
+          name: 'GitHubRepo'
+          value: githubRepo
         }
       ]
     }

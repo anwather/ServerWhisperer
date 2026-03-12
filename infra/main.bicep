@@ -14,9 +14,15 @@ param vmAdminPassword string
 @description('Public IP/CIDR allowed to access RDP and WinRM on the VM.')
 param deployerPublicIp string
 
-@description('Teams webhook URL stored in Key Vault.')
+@description('GitHub Personal Access Token stored in Key Vault.')
 @secure()
-param teamsWebhookUrl string
+param githubToken string
+
+@description('GitHub repository owner.')
+param githubOwner string
+
+@description('GitHub repository name.')
+param githubRepo string
 
 @description('Foundry agent ID (placeholder until created post-deploy).')
 param foundryAgentId string = 'TODO-AGENT-ID'
@@ -43,7 +49,7 @@ module keyVault 'modules/keyvault.bicep' = {
   params: {
     location: location
     resourcePrefix: resourcePrefix
-    teamsWebhookUrl: teamsWebhookUrl
+    githubToken: githubToken
     tags: tags
   }
 }
@@ -75,8 +81,6 @@ module foundry 'modules/foundry.bicep' = {
   params: {
     location: location
     resourcePrefix: resourcePrefix
-    storageAccountId: storage.outputs.storageAccountId
-    keyVaultId: keyVault.outputs.keyVaultId
     tags: tags
   }
 }
@@ -99,7 +103,9 @@ module functionApp 'modules/function-app.bicep' = {
     storageAccountId: storage.outputs.storageAccountId
     foundryEndpoint: foundry.outputs.foundryEndpoint
     foundryAgentId: foundryAgentId
-    teamsWebhookSecretUri: keyVault.outputs.teamsWebhookSecretUri
+    githubTokenSecretUri: keyVault.outputs.githubTokenSecretUri
+    githubOwner: githubOwner
+    githubRepo: githubRepo
     tags: tags
   }
 }
@@ -160,6 +166,16 @@ resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-0
   name: guid(resourceGroup().id, resourcePrefix, 'kv-secrets-user')
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+    principalId: functionApp.outputs.functionPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource azureAiUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, resourcePrefix, 'azure-ai-user')
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '64702f94-c441-49e6-a78b-ef80e0188fee')
     principalId: functionApp.outputs.functionPrincipalId
     principalType: 'ServicePrincipal'
   }

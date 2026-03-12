@@ -522,3 +522,38 @@ $jobs.Values | Remove-Job -Force -ErrorAction SilentlyContinue
 - All referenced paths verified to exist before commit
 
 ---
+
+### 2026-03-16 - Foundry Project Migration & GitHub Issues
+
+**Migrated from AI Hub + OpenAI to Foundry Project setup:**
+- Replaced Microsoft.MachineLearningServices/workspaces (Hub/Project) with Microsoft.CognitiveServices/accounts (kind: 'AIServices')
+- Foundry project is now a child resource: Microsoft.CognitiveServices/accounts/projects
+- Model deployment (gpt-4o-mini) deployed to the Foundry account, not separate OpenAI resource
+- Endpoint format: https://{account-name}.services.ai.azure.com/api/projects/{project-name}
+- API version upgraded from 2024-05-01-preview to 2025-05-01 (GA)
+- Token resource changed from https://cognitiveservices.azure.com to https://ai.azure.com
+- Function App requires Azure AI User role on Foundry project for access
+
+**Replaced Teams webhook with GitHub issue creation:**
+- SendReport/run.ps1 now creates GitHub issues via REST API instead of Teams Adaptive Cards
+- Issue format: [ServerWhisperer] {emoji} {alertRuleName} on {vmName} with labels serverwhisperer and severity label
+- GitHub PAT stored in Key Vault as GitHubToken secret
+- App settings: GitHubToken (Key Vault ref), GitHubOwner, GitHubRepo
+- Blob storage report still written; GitHub issue includes link to blob + Azure portal
+
+**Files modified:**
+- infra/modules/foundry.bicep — Complete rewrite for Foundry project architecture
+- infra/main.bicep — Removed Teams params, added GitHub params, added Azure AI User RBAC
+- infra/main.bicepparam — Replaced 	eamsWebhookUrl with githubToken, githubOwner, githubRepo
+- infra/modules/keyvault.bicep — Replaced Teams secret with GitHub PAT
+- infra/modules/function-app.bicep — Updated app settings for GitHub
+- infra/function-app/AnalyzeWithFoundryAgent/run.ps1 — Rewritten for Foundry Agents API
+- infra/function-app/SendReport/run.ps1 — Replaced Teams card with GitHub issue creation
+- infra/scripts/create-foundry-agent.ps1 — Updated for Foundry project endpoint and token resource
+
+**Deployment notes:**
+- create-foundry-agent.ps1 now requires -FoundryAccountName parameter (account name from Bicep)
+- Agent creation: POST {projectEndpoint}/agents?api-version=2025-05-01
+- Thread/run pattern remains the same, just different base URL and auth
+- RBAC assignment to Foundry project scope is critical — missing this breaks agent access
+

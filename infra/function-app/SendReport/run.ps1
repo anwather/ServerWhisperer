@@ -14,6 +14,12 @@ $severityEmoji = switch -Regex ($alert.severity) {
     default { '🟢' }
 }
 
+$severityLabel = switch -Regex ($alert.severity) {
+    'Sev0|Sev1' { 'critical' }
+    'Sev2' { 'warning' }
+    default { 'info' }
+}
+
 $timestamp = (Get-Date).ToUniversalTime().ToString('yyyyMMdd-HHmmss')
 $vmName = if ($target.VMName) { $target.VMName } else { 'unknown' }
 $blobName = "$timestamp-$vmName-report.json"
@@ -47,26 +53,18 @@ try {
 
 $reportUrl = "https://$storageAccount.blob.core.windows.net/$containerName/$blobName"
 
-function Get-TeamsWebhookUrl {
-    if ($env:TEAMS_WEBHOOK_URL) {
-        return $env:TEAMS_WEBHOOK_URL
-    }
+# Get GitHub settings
+$githubToken = $env:GitHubToken
+$githubOwner = $env:GitHubOwner
+$githubRepo = $env:GitHubRepo
 
-    if ($env:TeamsWebhookUrl -and $env:TeamsWebhookUrl -notmatch '@Microsoft\.KeyVault') {
-        return $env:TeamsWebhookUrl
+if (-not $githubToken -or -not $githubOwner -or -not $githubRepo) {
+    Write-Warning "GitHub settings incomplete. GitHubToken, GitHubOwner, and GitHubRepo are required."
+    return @{
+        ReportUrl    = $reportUrl
+        StorageBlob  = $blobName
+        GitHubStatus = 'Skipped: GitHub settings not configured'
     }
-
-    if ($env:KEYVAULT_NAME) {
-        $secretName = if ($env:TEAMS_WEBHOOK_SECRET_NAME) { $env:TEAMS_WEBHOOK_SECRET_NAME } else { 'teams-webhook-url' }
-        try {
-            $secret = Get-AzKeyVaultSecret -VaultName $env:KEYVAULT_NAME -Name $secretName -ErrorAction Stop
-            return [System.Net.NetworkCredential]::new('', $secret.SecretValue).Password
-        } catch {
-            return $null
-        }
-    }
-
-    return $null
 }
 
 $analysisText = if ($analysis -is [string]) {
@@ -77,83 +75,53 @@ $analysisText = if ($analysis -is [string]) {
     $analysis | ConvertTo-Json -Depth 5
 }
 
-$rootCauseSummary = if ($analysisText) {
-    $analysisText.Substring(0, [Math]::Min(700, $analysisText.Length))
-} else {
-    'No analysis available.'
-}
+$portalUrl = "https://portal.azure.com/#resource$($alert.targetResourceId)"
 
-$card = @{
-    type    = 'AdaptiveCard'
-    version = '1.4'
-    body    = @(
-        @{
-            type   = 'TextBlock'
-            size   = 'Large'
-            weight = 'Bolder'
-            text   = "$severityEmoji $($alert.alertRuleName)"
-            wrap   = $true
-        },
-        @{
-            type  = 'FactSet'
-            facts = @(
-                @{ title = 'Server'; value = $vmName },
-                @{ title = 'Severity'; value = $alert.severity },
-                @{ title = 'Metric'; value = $alert.metricName },
-                @{ title = 'Value'; value = "$($alert.metricValue)" },
-                @{ title = 'Time'; value = $alert.timestamp }
-            )
-        },
-        @{
-            type   = 'TextBlock'
-            text   = 'Root Cause Summary'
-            weight = 'Bolder'
-            wrap   = $true
-        },
-        @{
-            type = 'TextBlock'
-            text = $rootCauseSummary
-            wrap = $true
-        }
-    )
-    actions = @(
-        @{
-            type  = 'Action.OpenUrl'
-            title = 'View Full Report'
-            url   = $reportUrl
-        },
-        @{
-            type  = 'Action.OpenUrl'
-            title = 'View in Azure Portal'
-            url   = "https://portal.azure.com/#resource$($alert.targetResourceId)"
-        }
-    )
-}
+# Create GitHub issue body
+$issueBody = @"
+## Alert Details
+- **Server:** $vmName
+- **Severity:** $($alert.severity)
+- **Metric:** $($alert.metricName)
+- **Value:** $($alert.metricValue)
+- **Time:** $($alert.timestamp)
+- **Resource ID:** $($alert.targetResourceId)
 
-$teamsPayload = @{
-    type        = 'message'
-    attachments = @(
-        @{
-            contentType = 'application/vnd.microsoft.card.adaptive'
-            content     = $card
-        }
-    )
-}
+## AI Analysis
+$analysisText
+
+## Links
+- [View Full Report (Blob Storage)]($reportUrl)
+- [View VM in Azure Portal]($portalUrl)
+
+---
+*This issue was automatically created by ServerWhisperer alert automation.*
+"@
+
+$issueTitle = "[ServerWhisperer] $severityEmoji $($alert.alertRuleName) on $vmName"
+
+$issuePayload = @{
+    title  = $issueTitle
+    body   = $issueBody
+    labels = @('serverwhisperer', $severityLabel)
+} | ConvertTo-Json -Depth 5
+
+$githubApiUrl = "https://api.github.com/repos/$githubOwner/$githubRepo/issues"
 
 try {
-    $webhookUrl = Get-TeamsWebhookUrl
-    if ($webhookUrl) {
-        Invoke-RestMethod -Method Post -Uri $webhookUrl -Body ($teamsPayload | ConvertTo-Json -Depth 8) -ContentType 'application/json' -ErrorAction Stop | Out-Null
-        $teamsStatus = 'Sent'
-    } else {
-        $teamsStatus = 'Skipped: No webhook URL configured'
+    $headers = @{
+        Authorization = "token $githubToken"
+        Accept        = 'application/vnd.github.v3+json'
     }
+    
+    $issue = Invoke-RestMethod -Method Post -Uri $githubApiUrl -Headers $headers -Body $issuePayload -ContentType 'application/json' -ErrorAction Stop
+    $githubStatus = "Created issue #$($issue.number): $($issue.html_url)"
 } catch {
-    $teamsStatus = "Failed: $($_.Exception.Message)"
+    $githubStatus = "Failed: $($_.Exception.Message)"
 }
 
 @{
-    ReportUrl   = $reportUrl
-    StorageBlob = $blobName
-    TeamsStatus = $teamsStatus
+    ReportUrl    = $reportUrl
+    StorageBlob  = $blobName
+    GitHubStatus = $githubStatus
 }

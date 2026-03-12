@@ -3,6 +3,9 @@ param(
     [string]$ResourceGroup,
 
     [Parameter(Mandatory = $true)]
+    [string]$FoundryAccountName,
+
+    [Parameter(Mandatory = $true)]
     [string]$ProjectName,
 
     [string]$DeploymentName = 'main'
@@ -18,26 +21,22 @@ function Get-FoundryEndpoint {
         -o tsv 2>$null
 
     if (-not $endpoint) {
-        $endpoint = az resource show `
-            --resource-group $ResourceGroup `
-            --name $ProjectName `
-            --resource-type 'Microsoft.MachineLearningServices/workspaces' `
-            --query 'properties.discoveryUrl' `
-            -o tsv 2>$null
+        # Construct endpoint manually from account and project names
+        $endpoint = "https://${FoundryAccountName}.services.ai.azure.com/api/projects/${ProjectName}"
     }
 
     if (-not $endpoint) {
-        throw 'Unable to resolve Foundry endpoint from deployment outputs or project resource.'
+        throw 'Unable to resolve Foundry endpoint from deployment outputs or construct from names.'
     }
 
     return $endpoint.TrimEnd('/')
 }
 
 $foundryEndpoint = Get-FoundryEndpoint
-$token = az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv
+$token = az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv
 
 if (-not $token) {
-    throw 'Failed to acquire Azure CLI access token.'
+    throw 'Failed to acquire Azure CLI access token for Foundry (https://ai.azure.com).'
 }
 
 $systemPrompt = @"
@@ -131,7 +130,7 @@ $headers = @{
 }
 
 try {
-    $response = Invoke-RestMethod -Method Post -Uri "$foundryEndpoint/openai/assistants?api-version=2024-07-01-preview" -Headers $headers -Body ($body | ConvertTo-Json -Depth 10) -ErrorAction Stop
+    $response = Invoke-RestMethod -Method Post -Uri "$foundryEndpoint/agents?api-version=2025-05-01" -Headers $headers -Body ($body | ConvertTo-Json -Depth 10) -ErrorAction Stop
 } catch {
     throw "Foundry agent creation failed. $($_.Exception.Message)"
 }

@@ -4,64 +4,40 @@ param location string
 @description('Prefix used for resource names.')
 param resourcePrefix string
 
-@description('Storage account resource ID for Foundry.')
-param storageAccountId string
-
-@description('Key Vault resource ID for Foundry.')
-param keyVaultId string
-
 @description('Tags applied to resources.')
 param tags object
 
-var aiHubName = '${resourcePrefix}-aihub'
-var aiProjectName = '${resourcePrefix}-aiproj'
-var openAiName = toLower('${resourcePrefix}-openai-${uniqueString(resourceGroup().id)}')
+var accountName = toLower('${resourcePrefix}-foundry-${uniqueString(resourceGroup().id)}')
+var projectName = '${resourcePrefix}-project'
 
-resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
-  name: aiHubName
+resource aiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
+  name: accountName
   location: location
-  kind: 'Hub'
-  tags: tags
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    friendlyName: 'ServerWhisperer AI Hub'
-    storageAccount: storageAccountId
-    keyVault: keyVaultId
-  }
-}
-
-resource aiProject 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
-  name: aiProjectName
-  location: location
-  kind: 'Project'
-  tags: tags
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    friendlyName: 'ServerWhisperer Diagnostics'
-    hubResourceId: aiHub.id
-  }
-}
-
-resource openAiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
-  name: openAiName
-  location: location
-  kind: 'OpenAI'
+  kind: 'AIServices'
   tags: tags
   sku: {
     name: 'S0'
   }
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
-    customSubDomainName: openAiName
+    customSubDomainName: accountName
     publicNetworkAccess: 'Enabled'
   }
 }
 
-resource openAiDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  name: '${openAiAccount.name}/gpt-4o-mini'
+resource aiProject 'Microsoft.CognitiveServices/accounts/projects@2024-10-01' = {
+  name: projectName
+  parent: aiAccount
+  properties: {
+    friendlyName: 'ServerWhisperer Diagnostics'
+  }
+}
+
+resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  name: 'gpt-4o-mini'
+  parent: aiAccount
   sku: {
     name: 'GlobalStandard'
     capacity: 10
@@ -73,13 +49,19 @@ resource openAiDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024
       version: '2024-07-18'
     }
   }
+  dependsOn: [
+    aiProject
+  ]
 }
 
-@description('AI Hub resource ID.')
-output aiHubId string = aiHub.id
+@description('Foundry account resource ID.')
+output accountId string = aiAccount.id
 
-@description('AI Project resource ID.')
-output aiProjectId string = aiProject.id
+@description('Foundry project resource ID.')
+output projectId string = aiProject.id
 
-@description('OpenAI endpoint for Foundry workloads.')
-output foundryEndpoint string = openAiAccount.properties.endpoint
+@description('Foundry project endpoint for Agents API.')
+output foundryEndpoint string = 'https://${aiAccount.name}.services.ai.azure.com/api/projects/${aiProject.name}'
+
+@description('Foundry account principal ID for RBAC.')
+output accountPrincipalId string = aiAccount.identity.principalId
