@@ -1,12 +1,16 @@
-param($Input)
+param($InputData)
 
 $ErrorActionPreference = 'Stop'
 
-if (-not $Input.targetResourceId) {
-    throw 'Alert payload missing targetResourceId.'
+Write-Host "ClassifyTarget received input type: $($InputData.GetType().FullName)"
+Write-Host "ClassifyTarget input keys: $(($InputData | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) -join ', ')"
+Write-Host "ClassifyTarget targetResourceId: '$($InputData.targetResourceId)'"
+
+if (-not $InputData.targetResourceId) {
+    throw "Alert payload missing targetResourceId. Input dump: $($InputData | ConvertTo-Json -Depth 2 -Compress)"
 }
 
-$resourceId = $Input.targetResourceId
+$resourceId = $InputData.targetResourceId
 $subscriptionIdFromId = ($resourceId -split '/')[2]
 $query = @"
 Resources
@@ -24,7 +28,7 @@ if (-not $resource) {
     throw "Target resource not found in Resource Graph: $resourceId"
 }
 
-$alertType = if ($Input.metricName) { $Input.metricName } else { $Input.alertRuleName }
+$alertType = if ($InputData.metricName) { $InputData.metricName } else { $InputData.alertRuleName }
 
 $areas = @('Overview', 'Performance', 'Disks', 'Services', 'Processes', 'Events')
 switch -Regex ($alertType) {
@@ -50,5 +54,5 @@ switch -Regex ($alertType) {
         Areas              = $areas
     }
     AlertType  = $alertType
-    SignalType = $Input.signalType
+    SignalType = $InputData.signalType
 }

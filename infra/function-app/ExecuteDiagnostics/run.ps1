@@ -1,8 +1,8 @@
-param($Input)
+param($InputData)
 
 $ErrorActionPreference = 'Stop'
 
-$target = $Input.Target
+$target = $InputData.Target
 if (-not $target.VMName -or -not $target.ResourceGroupName) {
     throw 'ExecuteDiagnostics requires Target.VMName and Target.ResourceGroupName.'
 }
@@ -21,7 +21,7 @@ if (-not (Test-Path $scriptPath)) {
 }
 
 $scriptContent = Get-Content -Path $scriptPath -Raw
-$parameters = @{ AlertType = $Input.AlertType }
+$parameters = @{ AlertType = $InputData.AlertType }
 
 try {
     $runResult = Invoke-AzVMRunCommand `

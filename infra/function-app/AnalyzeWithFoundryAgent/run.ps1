@@ -1,4 +1,4 @@
-param($Input)
+param($InputData)
 
 $ErrorActionPreference = 'Stop'
 
@@ -13,11 +13,11 @@ if (-not $agentId) {
     throw 'FOUNDRY_AGENT_ID app setting is required.'
 }
 
-if ($Input.Target.SubscriptionId) {
+if ($InputData.Target.SubscriptionId) {
     try {
-        Set-AzContext -SubscriptionId $Input.Target.SubscriptionId -ErrorAction Stop | Out-Null
+        Set-AzContext -SubscriptionId $InputData.Target.SubscriptionId -ErrorAction Stop | Out-Null
     } catch {
-        throw "Failed to set Az context to subscription $($Input.Target.SubscriptionId). $($_.Exception.Message)"
+        throw "Failed to set Az context to subscription $($InputData.Target.SubscriptionId). $($_.Exception.Message)"
     }
 }
 
@@ -57,9 +57,9 @@ function Invoke-FoundryRequest {
 $thread = Invoke-FoundryRequest -Method 'POST' -Uri "$foundryEndpoint/agents/v1.0/threads" -Body @{}
 $threadId = $thread.id
 
-$diagnosticJson = $Input.Diagnostics.Output | ConvertTo-Json -Depth 6 -Compress
-$alert = $Input.Alert
-$serverName = $Input.ServerName
+$diagnosticJson = $InputData.Diagnostics.Output | ConvertTo-Json -Depth 6 -Compress
+$alert = $InputData.Alert
+$serverName = $InputData.ServerName
 
 $messageContent = @"
 ## Alert Triggered

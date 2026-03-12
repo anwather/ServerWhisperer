@@ -1,11 +1,11 @@
-param($Input)
+param($InputData)
 
 $ErrorActionPreference = 'Stop'
 
-$alert = $Input.Alert
-$analysis = $Input.Analysis
-$results = $Input.Results
-$target = $Input.Target
+$alert = $InputData.Alert
+$analysis = $InputData.Analysis
+$results = $InputData.Results
+$target = $InputData.Target
 
 $severityEmoji = switch -Regex ($alert.severity) {
     'Sev0|Sev1' { '🔴' }
